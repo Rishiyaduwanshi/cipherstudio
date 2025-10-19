@@ -1,125 +1,114 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { initialFiles } from '@/app/data/initialProject-react';
-import ProjectManager from './components/ProjectManager';
-import ThemeSwitcher from './components/ThemeSwitcher';
+import useAuthStore from '@/stores/authStore';
+import useThemeStore from '@/stores/themeStore';
+import LandingPage from '@/components/LandingPage';
+import Dashboard from '@/components/Dashboard';
+import AuthModal from '@/components/AuthModal';
 import SandpackEditor from './components/SandpackEditor';
+import { initialFiles } from '@/app/data/initialProject-react';
 
 export default function Home() {
-  const [project, setProject] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const { user, loading: authLoading, isAuthenticated } = useAuthStore();
+  const { mounted: themeLoaded } = useThemeStore();
+  
+  const [currentView, setCurrentView] = useState('landing'); // 'landing', 'dashboard', 'ide'
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [currentProject, setCurrentProject] = useState(null);
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
     setIsMounted(true);
   }, []);
 
-  // File operations
-  const handleAddFile = (filePath, content = '') => {
-    const updatedProject = {
-      ...project,
-      files: {
-        ...project.files,
-        [filePath]: { code: content }
-      }
-    };
-    setProject(updatedProject);
-    localStorage.setItem('cipherstudio-project', JSON.stringify(updatedProject));
-  };
-
-  const handleDeleteFile = (filePath) => {
-    const updatedFiles = { ...project.files };
-    delete updatedFiles[filePath];
-    const updatedProject = {
-      ...project,
-      files: updatedFiles
-    };
-    setProject(updatedProject);
-    localStorage.setItem('cipherstudio-project', JSON.stringify(updatedProject));
-  };
-
-  const handleAddFolder = (folderName) => {
-    // Create a placeholder file in the folder
-    const filePath = `/${folderName}/index.js`;
-    handleAddFile(filePath, '// Folder created\n');
-  };
-
+  // Handle authentication state changes
   useEffect(() => {
-    if (!isMounted) return;
-    
-    const loadProject = () => {
-      try {
-        const savedProject = localStorage.getItem('cipherstudio-project');
-        
-        if (savedProject && savedProject !== 'undefined') {
-          const parsed = JSON.parse(savedProject);
-          if (parsed && parsed.files && Object.keys(parsed.files).length > 0) {
-            console.log('Loading saved project:', parsed);
-            setProject(parsed);
-            setIsLoading(false);
-            return;
-          }
-        }
-
-        // Use initialFiles if no valid saved project
-        console.log('Loading initial project with files:', Object.keys(initialFiles));
-        const initialProject = {
-          name: 'CipherStudio Project',
-          files: initialFiles,
-        };
-
-        setProject(initialProject);
-        localStorage.setItem('cipherstudio-project', JSON.stringify(initialProject));
-        
-      } catch (error) {
-        console.error('localStorage error:', error);
-        // Use initialFiles on error
-        const initialProject = {
-          name: 'CipherStudio Project',
-          files: initialFiles,
-        };
-        setProject(initialProject);
-        localStorage.removeItem('cipherstudio-project');
-      } finally {
-        setIsLoading(false);
+    if (isMounted && !authLoading) {
+      if (isAuthenticated()) {
+        setCurrentView('dashboard');
+      } else {
+        setCurrentView('landing');
       }
-    };
+    }
+  }, [isMounted, authLoading, isAuthenticated]);
 
-    loadProject();
-  }, [isMounted]);
+  // Navigation handlers
+  const handleGetStarted = () => {
+    if (isAuthenticated()) {
+      setCurrentView('dashboard');
+    } else {
+      setShowAuthModal(true);
+    }
+  };
 
-  // Show loading until component is mounted and project is loaded
-  if (!isMounted || isLoading || !project) {
+  const handleAuthSuccess = () => {
+    setShowAuthModal(false);
+    setCurrentView('dashboard');
+  };
+
+  const handleOpenIDE = (project = null) => {
+    if (project) {
+      setCurrentProject(project);
+    } else {
+      // Create default project
+      setCurrentProject({
+        name: 'New Project',
+        files: initialFiles,
+      });
+    }
+    setCurrentView('ide');
+  };
+
+  const handleBackToDashboard = () => {
+    setCurrentView('dashboard');
+    setCurrentProject(null);
+  };
+
+  // Show loading until everything is initialized
+  if (!isMounted || authLoading || !themeLoaded) {
     return (
-      <div className="h-screen bg-gray-900 text-white flex items-center justify-center">
+      <div className="h-screen bg-slate-900 text-white flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-400 mx-auto mb-4"></div>
-          <p className="text-gray-400">Loading CipherStudio...</p>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-400 mx-auto mb-4"></div>
+          <p className="text-slate-400">Loading CipherStudio...</p>
         </div>
       </div>
     );
   }
 
-  return (
-    <div className="h-screen bg-gray-900 text-white flex flex-col">
-      {/* Header */}
-      <div className="h-12 bg-gray-800 flex items-center px-4 border-b border-gray-700">
-        <h1 className="text-xl font-bold text-blue-400">CipherStudio</h1>
-        <div className="ml-auto flex items-center space-x-4">
-          <span className="text-sm text-gray-400">Project: {project.name}</span>
-          <ThemeSwitcher />
-          <ProjectManager project={project} setProject={setProject} />
-        </div>
-      </div>
-
-      {/* Editor */}
-      <div className="flex-1 overflow-hidden" style={{ height: 'calc(100vh - 3rem)' }}>
-        <SandpackEditor 
-          files={project.files}
-          onAddFile={handleAddFile}
-          onDeleteFile={handleDeleteFile}
-          onAddFolder={handleAddFolder}
+  // Render different views based on current state
+  if (currentView === 'landing') {
+    return (
+      <>
+        <LandingPage onGetStarted={handleGetStarted} />
+        <AuthModal 
+          isOpen={showAuthModal} 
+          onClose={() => setShowAuthModal(false)}
+          onSuccess={handleAuthSuccess}
         />
+      </>
+    );
+  }
+
+  if (currentView === 'dashboard') {
+    return <Dashboard onOpenIDE={handleOpenIDE} />;
+  }
+
+  if (currentView === 'ide' && currentProject) {
+    return (
+      <SandpackEditor 
+        project={currentProject} 
+        onBack={handleBackToDashboard}
+      />
+    );
+  }
+
+  // Fallback
+  return (
+    <div className="h-screen bg-slate-900 text-white flex items-center justify-center">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-400 mx-auto mb-4"></div>
+        <p className="text-slate-400">Loading...</p>
       </div>
     </div>
   );

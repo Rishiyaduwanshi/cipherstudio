@@ -66,16 +66,27 @@ export async function POST(request) {
     // Return user data without password
     const { password: _, ...userWithoutPassword } = user.toObject();
     
-    return NextResponse.json({
+    // Create response with httpOnly cookie
+    const response = NextResponse.json({
       message: 'Login successful',
       statusCode: 200,
       success: true,
       data: {
-        user: userWithoutPassword,
-        token
+        user: userWithoutPassword
       },
       timestamp: new Date().toISOString()
     }, { status: 200 });
+    
+    // Set httpOnly cookie for authentication
+    response.cookies.set('auth-token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 60 * 60 * 24 * 7, // 7 days
+      path: '/'
+    });
+    
+    return response;
     
   } catch (error) {
     console.error('Error during login:', error);

@@ -13,21 +13,21 @@ export async function GET(request) {
   try {
     await connectDB();
     
-    const authHeader = request.headers.get('authorization');
-    const authResult = verifyAuthToken(authHeader);
+    // Get user info from middleware headers
+    const userId = request.headers.get('x-user-id');
     
-    if (!authResult.success) {
+    if (!userId) {
       return NextResponse.json({
-        message: authResult.error,
+        message: 'User not authenticated',
         statusCode: 401,
         success: false,
         data: null,
-        errors: [{ field: 'authorization', message: authResult.error }],
+        errors: [{ field: 'authorization', message: 'User authentication failed' }],
         timestamp: new Date().toISOString()
       }, { status: 401 });
     }
     
-    const projects = await Project.find({ userId: authResult.user.userId })
+    const projects = await Project.find({ userId })
       .sort({ updatedAt: -1 })
       .populate('rootFolderId');
     
@@ -66,16 +66,16 @@ export async function POST(request) {
   try {
     await connectDB();
     
-    const authHeader = request.headers.get('authorization');
-    const authResult = verifyAuthToken(authHeader);
+    // Get user info from middleware headers
+    const userId = request.headers.get('x-user-id');
     
-    if (!authResult.success) {
+    if (!userId) {
       return NextResponse.json({
-        message: authResult.error,
+        message: 'User not authenticated',
         statusCode: 401,
         success: false,
         data: null,
-        errors: [{ field: 'authorization', message: authResult.error }],
+        errors: [{ field: 'authorization', message: 'User authentication failed' }],
         timestamp: new Date().toISOString()
       }, { status: 401 });
     }
@@ -97,7 +97,7 @@ export async function POST(request) {
     // Check if project slug already exists for this user
     const existingProject = await Project.findOne({ 
       projectSlug, 
-      userId: authResult.user.userId 
+      userId: userId 
     });
     if (existingProject) {
       return NextResponse.json({
@@ -123,7 +123,7 @@ export async function POST(request) {
     // Create new project
     const newProject = new Project({
       projectSlug,
-      userId: authResult.user.userId,
+      userId: userId,
       name,
       description,
       rootFolderId: savedRootFolder._id,
