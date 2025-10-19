@@ -1,13 +1,75 @@
 "use client"
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { initialFiles } from '@/app/data/initialProject-react';
+import projectAPI from '@/app/services/projectAPI';
 
 export default function ProjectManager({ project, setProject, onNewProject, onLoadProject }) {
   const [showProjectModal, setShowProjectModal] = useState(false);
-  const [projectName, setProjectName] = useState('');
+  const [showSaveModal, setShowSaveModal] = useState(false);
   const [showLoadModal, setShowLoadModal] = useState(false);
+  const [projectName, setProjectName] = useState('');
+  const [projectDescription, setProjectDescription] = useState('');
+  const [isPublic, setIsPublic] = useState(false);
   const [savedProjects, setSavedProjects] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
 
+  // Save project to database
+  const handleSaveProject = async () => {
+    if (!projectName.trim()) {
+      setError('Project name is required');
+      return;
+    }
+
+    setSaving(true);
+    setError('');
+
+    try {
+      const projectToSave = {
+        id: project.id,
+        name: projectName.trim(),
+        description: projectDescription.trim(),
+        files: project.files,
+        isPublic,
+        tags: []
+      };
+
+      const savedProject = await projectAPI.saveProject(projectToSave);
+      
+      // Update local project with server data
+      setProject({
+        ...project,
+        id: savedProject._id,
+        name: savedProject.name,
+        description: savedProject.description,
+        isPublic: savedProject.isPublic
+      });
+
+      // Update localStorage
+      localStorage.setItem('cipherstudio-project', JSON.stringify({
+        ...project,
+        id: savedProject._id,
+        name: savedProject.name
+      }));
+
+      setProjectName('');
+      setProjectDescription('');
+      setIsPublic(false);
+      setShowSaveModal(false);
+      
+      // Success notification
+      console.log('✅ Project saved successfully:', savedProject.name);
+
+    } catch (error) {
+      setError(error.message || 'Failed to save project');
+      console.error('❌ Save error:', error);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // Create new project
   const handleNewProject = () => {
     if (projectName.trim()) {
       const newProject = {
@@ -22,16 +84,36 @@ export default function ProjectManager({ project, setProject, onNewProject, onLo
     }
   };
 
-  const loadSavedProjects = () => {
-    const projects = [];
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      if (key?.startsWith('cipherstudio-project-')) {
-        const project = JSON.parse(localStorage.getItem(key));
-        projects.push({ key, ...project });
+  // Load projects from database
+  const loadSavedProjects = async () => {
+    setLoading(true);
+    setError('');
+
+    try {
+      const projects = await projectAPI.getProjects({ limit: 20 });
+      setSavedProjects(projects);
+    } catch (error) {
+      setError(error.message || 'Failed to load projects');
+      console.error('❌ Load projects error:', error);
+      
+      // Fallback to localStorage
+      const localProjects = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key?.startsWith('cipherstudio-project')) {
+          try {
+            const project = JSON.parse(localStorage.getItem(key));
+            localProjects.push({ key, ...project });
+          } catch (e) {
+            console.warn('Failed to parse project:', key);
+          }
+        }
       }
+      setSavedProjects(localProjects);
+    } finally {
+      setLoading(false);
     }
-    setSavedProjects(projects);
+    
     setShowLoadModal(true);
   };
 
