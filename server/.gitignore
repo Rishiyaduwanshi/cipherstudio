@@ -1,0 +1,13 @@
+.github
+node_modules
+demo
+.env
+.env.dev
+logs
+.next
+.trae
+.vscode
+dist
+uploads
+temp
+queue.json
