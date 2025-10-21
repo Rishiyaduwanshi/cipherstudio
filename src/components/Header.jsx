@@ -39,9 +39,14 @@ export default function Header() {
             </button>
           </>
         ) : (
-          <Link href="/signin" className="text-sm px-2 py-1 border rounded">
-            Sign in
-          </Link>
+          <div className="flex items-center gap-2">
+            <Link href="/signin" className="text-sm px-2 py-1 border rounded">
+              Sign in
+            </Link>
+            <Link href="/signup" className="text-sm px-2 py-1 border rounded bg-green-600 text-white hover:bg-green-700">
+              Sign up
+            </Link>
+          </div>
         )}
       </div>
     </header>

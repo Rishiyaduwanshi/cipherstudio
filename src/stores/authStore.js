@@ -1,42 +1,37 @@
 import { create } from 'zustand';
-import { toast } from 'react-toastify';
 import axios from 'axios';
 
-// Normalize API base so callers don't need to include /api/v1 in env
-const RAW_API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000';
+const RAW_API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || '';
 function normalizeApiRoot(raw) {
-  if (!raw) return 'http://localhost:5000/api/v1';
+  if (!raw) return '';
   let r = String(raw).trim().replace(/\/+$/, '');
-  if (!/\/api\/v\d+/i.test(r)) {
-    r = `${r}/api/v1`;
-  }
+  if (!/\/api\/v\d+/i.test(r)) r = `${r}/api/v1`;
   return r;
 }
-const API_ROOT = normalizeApiRoot(RAW_API_BASE);
-const AUTH_URL = `${API_ROOT}/auth`;
+const API_ROOT = normalizeApiRoot(RAW_API_BASE) || '/api/v1';
+const AUTH_BASE = `${API_ROOT}/auth`;
+const SIGNIN_URL = `${AUTH_BASE}/signin`;
+const SIGNUP_URL = `${AUTH_BASE}/signup`;
+const SIGNOUT_URL = `${AUTH_BASE}/signout`;
 
 const useAuthStore = create((set, get) => ({
   user: null,
   loading: false,
 
-  // Check if the user is authenticated
   isAuthenticated: () => {
     return !!get().user;
   },
 
-  // Login function
   login: async (email, password) => {
     try {
       set({ loading: true });
-      // Debug: log the auth URL being used (do not log password)
-      console.info('Auth sign-in POST to:', `${AUTH_URL}/signin`, 'payload:', { email });
-      const response = await axios.post(`${AUTH_URL}/signin`, { email, password }, { withCredentials: true });
+  console.info('Auth sign-in POST to:', SIGNIN_URL, 'payload:', { email });
+  const response = await axios.post(SIGNIN_URL, { email, password }, { withCredentials: true });
       set({ user: response.data.data.user, loading: false });
       return { success: true };
     } catch (error) {
       console.error('Login error:', error.response?.data || error.message || error);
       set({ loading: false });
-      // Return structured server response when available
       const serverData = error.response?.data;
       if (serverData) {
         return { success: false, error: serverData.message || 'Login failed', details: serverData };
@@ -45,11 +40,10 @@ const useAuthStore = create((set, get) => ({
     }
   },
 
-  // Logout function
   logout: async () => {
     try {
       set({ loading: true });
-  await axios.post(`${AUTH_URL}/signout`, {}, { withCredentials: true });
+  await axios.post(SIGNOUT_URL, {}, { withCredentials: true });
       set({ user: null, loading: false });
       return { success: true };
     } catch (error) {
@@ -59,11 +53,10 @@ const useAuthStore = create((set, get) => ({
     }
   },
 
-  // Register function
   register: async (name, email, password) => {
     try {
       set({ loading: true });
-  const response = await axios.post(`${AUTH_URL}/signup`, { name, email, password }, { withCredentials: true });
+  const response = await axios.post(SIGNUP_URL, { name, email, password }, { withCredentials: true });
   set({ user: response.data.data.user, loading: false });
       return { success: true };
     } catch (error) {
