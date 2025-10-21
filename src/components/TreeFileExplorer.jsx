@@ -1,6 +1,6 @@
 'use client';
 import { useState } from 'react';
-import { useFileTree } from '../../hooks/useFileTree';
+import { useFileTree } from '../hooks/useFileTree';
 
 export default function TreeFileExplorer({ files, onAddFile, onDeleteFile, onAddFolder, onOpenFile, activeFile, collapsed = false, onToggleCollapse, onRenameFile }) {
   const { tree, toggleFolder, getChildren } = useFileTree(files);

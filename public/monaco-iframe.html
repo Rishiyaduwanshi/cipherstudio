@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Monaco Iframe</title>
+  <style>
+    html,
+    body,
+    #container {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background: transparent
+    }
+
+    body {
+      background: transparent
+    }
+  </style>
+</head>
+
+<body>
+  <div id="container"></div>
+  <script>window._MONACO_BASE_URL = 'https://cdn.jsdelivr.net/npm/monaco-editor@0.54.0/min';</script>
+  <script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.54.0/min/vs/loader.js"></script>
+  <script>
+    (function () {
+      const targetOrigin = '*';
+      const post = (msg) => window.parent.postMessage(msg, targetOrigin);
+      let editor = null;
+      let model = null;
+
+      const nightOwlThemeUrl = 'https://unpkg.com/monaco-themes/themes/Blackboard.json';
+
+      function ensureMonaco(cb) {
+        if (window.monaco) return cb();
+        require.config({ paths: { vs: window._MONACO_BASE_URL + '/vs' } });
+        require(['vs/editor/editor.main'], cb);
+      }
+
+      function createEditor(content = '', language = 'javascript', options = {}) {
+        if (editor) {
+          if (model) model.dispose();
+          model = monaco.editor.createModel(content, language);
+          editor.setModel(model);
+          editor.updateOptions(options);
+          return;
+        }
+
+        model = monaco.editor.createModel(content, language);
+        editor = monaco.editor.create(document.getElementById('container'), Object.assign({
+          model: model,
+          automaticLayout: true,
+          minimap: { enabled: false },
+          theme: 'night-owl'
+        }, options));
+
+        model.onDidChangeContent(() => {
+          // throttle
+          if (typeof window.__lastChangeTimeout !== 'undefined') clearTimeout(window.__lastChangeTimeout);
+          window.__lastChangeTimeout = setTimeout(() => {
+            post({ type: 'change', value: model.getValue() });
+          }, 200);
+        });
+
+        editor.onDidChangeCursorPosition(() => {
+          const p = editor.getPosition();
+          post({ type: 'cursor', value: p });
+        });
+      }
+
+
+      function loadAndRegisterCustomTheme(themeUrl, themeName) {
+        return new Promise((resolve, reject) => {
+          fetch(themeUrl)
+            .then(response => response.json())
+            .then(data => {
+              monaco.editor.defineTheme(themeName, data);
+              resolve();
+            })
+            .catch(error => {
+              console.error('Failed to load custom theme from CDN:', error);
+              reject(error);
+            });
+        });
+      }
+
+      window.addEventListener('message', (ev) => {
+        const msg = ev.data;
+        if (!msg || !msg.type) return;
+        switch (msg.type) {
+          case 'init':
+            ensureMonaco(() => {
+              loadAndRegisterCustomTheme(nightOwlThemeUrl, 'night-owl').then(() => {
+                createEditor(msg.value.content || '', msg.value.language || 'javascript', msg.value.options || {});
+                post({ type: 'ready' });
+              })
+            });
+            break;
+          case 'setValue':
+            if (model) model.setValue(msg.value);
+            break;
+          case 'getValue':
+            post({ type: 'value', id: msg.id, value: model ? model.getValue() : '' });
+            break;
+          case 'format':
+            if (editor) {
+              editor.getAction('editor.action.formatDocument')?.run();
+              setTimeout(() => post({ type: 'change', value: model ? model.getValue() : '' }), 50);
+            }
+            break;
+          case 'undo':
+            editor?.trigger('keyboard', 'undo', {});
+            break;
+          case 'redo':
+            editor?.trigger('keyboard', 'redo', {});
+            break;
+          case 'setLanguage':
+            if (model && msg.value) monaco.editor.setModelLanguage(model, msg.value);
+            break;
+          case 'setOptions':
+            if (editor && msg.value) editor.updateOptions(msg.value);
+            break;
+          case 'focus':
+            editor?.focus();
+            break;
+          case 'runCommand':
+            try {
+              if (editor && msg.value) {
+                // Prefer getAction.run for built-in actions
+                const action = editor.getAction(msg.value);
+                if (action && typeof action.run === 'function') {
+                  action.run();
+                } else {
+                  // fallback to trigger
+                  editor.trigger('keyboard', msg.value, msg.args || {});
+                }
+                post({ type: 'runCommandAck', value: msg.value });
+              }
+            } catch (err) {
+              post({ type: 'runCommandError', error: String(err), value: msg.value });
+            }
+            break;
+        }
+      });
+
+      // tell parent iframe exists - still may not be ready to init monaco
+      post({ type: 'iframe-loaded' });
+    })();
+  </script>
+</body>
+
+</html>

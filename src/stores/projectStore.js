@@ -1,136 +1,70 @@
 import { create } from 'zustand';
 import { toast } from 'react-toastify';
+import projectAPI from '../services/projectAPI';
 
-const useProjectStore = create((set, get) => ({
+const useProjectStore = create((set) => ({
   projects: [],
   currentProject: null,
   loading: false,
 
-  // Fetch projects from server
   fetchProjects: async () => {
+    set({ loading: true });
     try {
-      set({ loading: true });
-      
-      const response = await fetch('/api/projects', {
-        credentials: 'include',
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch projects');
-      }
-
-      const data = await response.json();
-      set({ projects: data.data || [], loading: false });
+      const projects = await projectAPI.getProjects();
+      set({ projects: projects || [], loading: false });
+      toast.success('Projects loaded successfully');
+      return projects;
     } catch (error) {
-      console.error('Error fetching projects:', error);
-      toast.error('Failed to load projects');
       set({ loading: false });
+      toast.error(error.message || 'Failed to load projects');
+      throw error;
     }
   },
 
-  // Create new project
   createProject: async (projectData) => {
+    set({ loading: true });
     try {
-      const response = await fetch('/api/projects', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify(projectData),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to create project');
-      }
-
-      const data = await response.json();
-      const newProject = data.data;
-      
-      set(state => ({ 
-        projects: [newProject, ...state.projects],
-        currentProject: newProject
-      }));
-      
-      toast.success('Project created successfully! 🚀');
-      return { success: true, project: newProject };
+      const created = await projectAPI.createProject(projectData);
+      set((state) => ({ projects: [...state.projects, created], loading: false }));
+      toast.success('Project created successfully');
+      return created;
     } catch (error) {
-      console.error('Error creating project:', error);
-      toast.error('Failed to create project');
-      return { success: false, error: error.message };
+      set({ loading: false });
+      toast.error(error.message || 'Failed to create project');
+      throw error;
     }
   },
 
-  // Update project
+  fetchProjectById: async (projectId) => {
+    set({ loading: true });
+    try {
+      const project = await projectAPI.getProject(projectId);
+      set({ currentProject: project, loading: false });
+      toast.success('Project loaded successfully');
+      return project;
+    } catch (error) {
+      set({ loading: false });
+      toast.error(error.message || 'Failed to load project');
+      throw error;
+    }
+  },
   updateProject: async (projectId, updates) => {
+    set({ loading: true });
     try {
-      const response = await fetch(`/api/projects/${projectId}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify(updates),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to update project');
-      }
-
-      const data = await response.json();
-      const updatedProject = data.data;
-      
-      set(state => ({
-        projects: state.projects.map(p => 
-          p._id === projectId ? updatedProject : p
-        ),
-        currentProject: state.currentProject?._id === projectId ? updatedProject : state.currentProject
+      const updated = await projectAPI.updateProject(projectId, updates);
+      set((state) => ({
+        projects: state.projects.map((p) => (p._id === updated._id ? updated : p)),
+        currentProject: state.currentProject && state.currentProject._id === updated._id ? updated : state.currentProject,
+        loading: false,
       }));
-      
-      toast.success('Project updated successfully! ✅');
-      return { success: true, project: updatedProject };
+      toast.success('Project updated successfully');
+      return updated;
     } catch (error) {
-      console.error('Error updating project:', error);
-      toast.error('Failed to update project');
-      return { success: false, error: error.message };
+      set({ loading: false });
+      toast.error(error.message || 'Failed to update project');
+      throw error;
     }
   },
-
-  // Delete project
-  deleteProject: async (projectId) => {
-    try {
-      const response = await fetch(`/api/projects/${projectId}`, {
-        method: 'DELETE',
-        credentials: 'include',
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to delete project');
-      }
-
-      set(state => ({
-        projects: state.projects.filter(p => p._id !== projectId),
-        currentProject: state.currentProject?._id === projectId ? null : state.currentProject
-      }));
-      
-      toast.success('Project deleted successfully');
-      return { success: true };
-    } catch (error) {
-      console.error('Error deleting project:', error);
-      toast.error('Failed to delete project');
-      return { success: false, error: error.message };
-    }
-  },
-
-  // Set current project
-  setCurrentProject: (project) => {
-    set({ currentProject: project });
-  },
-
-  // Clear all projects (on logout)
-  clearProjects: () => {
-    set({ projects: [], currentProject: null });
-  }
 }));
 
 export default useProjectStore;

@@ -7,7 +7,12 @@ const useThemeStore = create((set, get) => ({
   initializeTheme: () => {
     if (typeof window !== 'undefined') {
       const savedTheme = localStorage.getItem('cipherstudio-theme') || 'dark';
-      document.documentElement.className = savedTheme;
+      // Use classList to only toggle the `light` class so we don't remove other classes
+      if (savedTheme === 'light') {
+        document.documentElement.classList.add('light');
+      } else {
+        document.documentElement.classList.remove('light');
+      }
       set({ theme: savedTheme, mounted: true });
     }
   },
@@ -18,13 +23,21 @@ const useThemeStore = create((set, get) => ({
     
     set({ theme: newTheme });
     localStorage.setItem('cipherstudio-theme', newTheme);
-    document.documentElement.className = newTheme;
+    if (newTheme === 'light') {
+      document.documentElement.classList.add('light');
+    } else {
+      document.documentElement.classList.remove('light');
+    }
   },
 
   setTheme: (newTheme) => {
     set({ theme: newTheme });
     localStorage.setItem('cipherstudio-theme', newTheme);
-    document.documentElement.className = newTheme;
+    if (newTheme === 'light') {
+      document.documentElement.classList.add('light');
+    } else {
+      document.documentElement.classList.remove('light');
+    }
   }
 }));
 

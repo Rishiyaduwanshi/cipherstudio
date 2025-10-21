@@ -1,119 +1,76 @@
 import { create } from 'zustand';
 import { toast } from 'react-toastify';
+import axios from 'axios';
+
+// Normalize API base so callers don't need to include /api/v1 in env
+const RAW_API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000';
+function normalizeApiRoot(raw) {
+  if (!raw) return 'http://localhost:5000/api/v1';
+  let r = String(raw).trim().replace(/\/+$/, '');
+  if (!/\/api\/v\d+/i.test(r)) {
+    r = `${r}/api/v1`;
+  }
+  return r;
+}
+const API_ROOT = normalizeApiRoot(RAW_API_BASE);
+const AUTH_URL = `${API_ROOT}/auth`;
 
 const useAuthStore = create((set, get) => ({
   user: null,
-  token: null,
-  loading: true,
-  
-  // Initialize auth state from cookies
-  initializeAuth: () => {
-    try {
-      // Check if user data exists in cookies (server will validate token automatically)
-      const userCookie = document.cookie
-        .split('; ')
-        .find(row => row.startsWith('user='));
-      
-      if (userCookie) {
-        const userData = JSON.parse(decodeURIComponent(userCookie.split('=')[1]));
-        set({ user: userData, loading: false });
-      } else {
-        set({ loading: false });
-      }
-    } catch (error) {
-      console.error('Error initializing auth:', error);
-      set({ loading: false });
-    }
+  loading: false,
+
+  // Check if the user is authenticated
+  isAuthenticated: () => {
+    return !!get().user;
   },
 
   // Login function
   login: async (email, password) => {
     try {
-      const response = await fetch('/api/users/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include', // Important: This sends cookies automatically
-        body: JSON.stringify({ email, password }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        toast.error(data.message || 'Login failed');
-        return { success: false, error: data.message };
-      }
-
-      const { user } = data.data;
-      
-      // Store user data in cookie (token will be httpOnly cookie from server)
-      document.cookie = `user=${encodeURIComponent(JSON.stringify(user))}; path=/; max-age=86400; SameSite=Strict`;
-      
-      set({ user });
-      toast.success('Login successful! Welcome back 🎉');
-      
+      set({ loading: true });
+      // Debug: log the auth URL being used (do not log password)
+      console.info('Auth sign-in POST to:', `${AUTH_URL}/signin`, 'payload:', { email });
+      const response = await axios.post(`${AUTH_URL}/signin`, { email, password }, { withCredentials: true });
+      set({ user: response.data.data.user, loading: false });
       return { success: true };
     } catch (error) {
-      console.error('Login error:', error);
-      toast.error('Network error. Please try again.');
-      return { success: false, error: error.message };
-    }
-  },
-
-  // Register function
-  register: async (name, email, password) => {
-    try {
-      const response = await fetch('/api/users', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({ name, email, password }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        toast.error(data.message || 'Registration failed');
-        return { success: false, error: data.message };
+      console.error('Login error:', error.response?.data || error.message || error);
+      set({ loading: false });
+      // Return structured server response when available
+      const serverData = error.response?.data;
+      if (serverData) {
+        return { success: false, error: serverData.message || 'Login failed', details: serverData };
       }
-
-      toast.success('Registration successful! Please login.');
-      return { success: true };
-    } catch (error) {
-      console.error('Registration error:', error);
-      toast.error('Network error. Please try again.');
-      return { success: false, error: error.message };
+      return { success: false, error: error.message || 'Login failed' };
     }
   },
 
   // Logout function
   logout: async () => {
     try {
-      await fetch('/api/users/logout', {
-        method: 'POST',
-        credentials: 'include',
-      });
-      
-      // Clear user cookie
-      document.cookie = 'user=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
-      
-      set({ user: null, token: null });
-      toast.info('Logged out successfully');
+      set({ loading: true });
+  await axios.post(`${AUTH_URL}/signout`, {}, { withCredentials: true });
+      set({ user: null, loading: false });
+      return { success: true };
     } catch (error) {
       console.error('Logout error:', error);
-      // Even if logout fails on server, clear client state
-      document.cookie = 'user=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
-      set({ user: null, token: null });
+      set({ loading: false });
+      return { success: false, error: error.response?.data?.message || 'Logout failed' };
     }
   },
 
-  // Check if user is authenticated
-  isAuthenticated: () => {
-    const { user } = get();
-    return !!user;
+  // Register function
+  register: async (name, email, password) => {
+    try {
+      set({ loading: true });
+  const response = await axios.post(`${AUTH_URL}/signup`, { name, email, password }, { withCredentials: true });
+  set({ user: response.data.data.user, loading: false });
+      return { success: true };
+    } catch (error) {
+      console.error('Registration error:', error);
+      set({ loading: false });
+      return { success: false, error: error.response?.data?.message || 'Registration failed' };
+    }
   }
 }));
 

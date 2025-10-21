@@ -46,14 +46,15 @@
   --ring: #6366f1;
 }
 
+/* Use CSS variables directly — variables are defined as hex values so don't wrap them in hsl() */
 * {
-  border-color: hsl(var(--border));
+  border-color: var(--border);
   box-sizing: border-box;
 }
 
 body {
-  background: hsl(var(--background));
-  color: hsl(var(--foreground));
+  background: var(--background);
+  color: var(--foreground);
   font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   margin: 0;
   padding: 0;
@@ -144,3 +145,150 @@ button:active {
   font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
   font-variant-ligatures: none;
 }
+
+/* Editor isolation: reduce leakage of global styles (transitions/transforms) into the in-app code editor */
+.editor-isolation {
+  height: 100%;
+  width: 100%;
+  position: relative;
+  /* Provide a neutral background unless Monaco or container supplies one */
+  background: transparent;
+  color: inherit;
+  -webkit-font-smoothing: auto;
+  -moz-osx-font-smoothing: auto;
+}
+
+/* Prevent large global transitions / transforms from affecting the editor UI or editor toolbars */
+.editor-isolation, .editor-isolation * {
+  transition: none !important;
+  transform: none !important;
+}
+
+/* Monaco places many elements inside .monaco-editor — give it a stable baseline */
+.editor-isolation .monaco-editor,
+.editor-isolation .monaco-editor * {
+  box-sizing: border-box;
+}
+
+/* Ensure inputs inside the editor area still look right when global styles change */
+.editor-isolation input,
+.editor-isolation textarea,
+.editor-isolation select {
+  font-family: monospace !important;
+}
+
+/* IDE toolbar, tabs, and status bar */
+.ide-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+  background: var(--card);
+  color: var(--card-foreground);
+}
+
+.ide-tabs {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--border);
+  background: linear-gradient(180deg, rgba(0,0,0,0.03), transparent);
+}
+
+.ide-tab {
+  padding: 6px 10px;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--card-foreground);
+  cursor: pointer;
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.ide-tab.active {
+  background: linear-gradient(90deg, rgba(99,102,241,0.15), rgba(99,102,241,0.08));
+  border: 1px solid rgba(99,102,241,0.18);
+}
+
+.ide-statusbar {
+  height: 28px;
+  padding: 4px 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border-top: 1px solid var(--border);
+  background: var(--secondary);
+  color: var(--secondary-foreground);
+  font-size: 12px;
+}
+
+/* Small helpers */
+.btn-ghost {
+  background: transparent;
+  border: 1px solid transparent;
+  color: inherit;
+  padding: 6px 8px;
+  border-radius: 4px;
+}
+
+.btn-ghost:hover {
+  background: rgba(255,255,255,0.03);
+}
+
+.badge-dirty {
+  width: 8px;
+  height: 8px;
+  background: var(--destructive);
+  border-radius: 999px;
+  display: inline-block;
+}
+
+/* Compact icon button used in toolbars and small headers */
+.btn-icon {
+  padding: 6px;
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  background: transparent;
+  border: 1px solid transparent;
+}
+.btn-icon svg { width: 18px; height: 18px; }
+.btn-icon:hover { background: rgba(255,255,255,0.03); }
+.btn-icon.active { background: rgba(99,102,241,0.12); border-color: rgba(99,102,241,0.12); }
+
+/* Primary action button (e.g. New file) */
+.btn-primary {
+  background: var(--primary);
+  color: var(--primary-foreground);
+  border: none;
+  padding: 6px 10px;
+  border-radius: 6px;
+}
+
+/* Simple popover for 'More' menu in the toolbar */
+.ide-more-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 160px;
+  background: var(--popover);
+  color: var(--popover-foreground);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 6px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ide-more-menu .btn-ghost { width: 100%; text-align: left; padding: 6px 8px; }

@@ -1,7 +1,8 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import 'react-toastify/dist/ReactToastify.css';
-import ClientProviders from '@/components/ClientProviders';
+import { ToastContainer } from 'react-toastify';
+import Header from '@/components/Header';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -25,9 +26,28 @@ export default function RootLayout({ children }) {
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         suppressHydrationWarning
       >
-        <ClientProviders>
-          {children}
-        </ClientProviders>
+        <Header />
+        <main className="pt-16">{children}</main>
+        <ToastContainer
+          position="top-right"
+          autoClose={3000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="dark"
+          toastStyle={{
+            backgroundColor: '#1e293b',
+            color: '#ffffff',
+            border: '1px solid #334155'
+          }}
+          progressStyle={{
+            backgroundColor: '#6366f1'
+          }}
+        />
       </body>
     </html>
   );
