@@ -131,7 +131,7 @@ export default function ProjectManager({ project, setProject }) {
         <div className="flex items-center space-x-2">
           <button
             onClick={() => setShowProjectModal(true)}
-            className="btn-success"
+            className="btn-success !py-1"
           >
             New Project
           </button>
