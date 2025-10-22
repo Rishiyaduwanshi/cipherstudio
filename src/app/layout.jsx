@@ -27,7 +27,7 @@ export default function RootLayout({ children }) {
         suppressHydrationWarning
       >
         <Header />
-        <main className="pt-16">{children}</main>
+        <main className="pt-[52]">{children}</main>
         <ToastContainer
           position="top-right"
           autoClose={3000}

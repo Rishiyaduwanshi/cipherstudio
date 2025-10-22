@@ -18,7 +18,7 @@ const CodeEditor = forwardRef(function CodeEditor({ language = 'javascript', cod
   }, []);
 
   return (
-    <div className="editor-isolation" style={{ height: '100%', width: '100%' }}>
+    <div className="editor-isolation">
       <MonacoIframe
         ref={iframeRef}
         code={code}

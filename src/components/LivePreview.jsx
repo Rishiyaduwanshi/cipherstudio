@@ -178,9 +178,9 @@ export default function LivePreview({ files = {} }) {
   }
 
   return (
-    <div className="h-full w-full">
-      <LiveProvider code={liveCode} scope={scope} noInline={false}>
-        <div className="h-full w-full overflow-auto p-2">
+    <div className="h-full w-ful" >
+      <LiveProvider code={liveCode} scope={scope} noInline={false} >
+        <div className="h-full w-full overflow-auto ">
           <RLPreview />
           <RLLiveError />
         </div>

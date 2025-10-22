@@ -323,41 +323,7 @@ export default function IDE({
   };
 
   const auth = useAuthStore();
-  const handleSaveToServer = async () => {
-    if (!project && !projectId) {
-      toast.error('Cannot save to server: no project context');
-      return;
-    }
-    if (!auth.isAuthenticated()) {
-      toast.info('Please sign in to save your project to the server.');
-      // Optionally, redirect to signin page:
-      try {
-        window.location.href = '/signin';
-      } catch (e) {}
-      return;
-    }
-    try {
-      const payload = {
-        _id: project?._id || project?.id || projectId,
-        name: project?.name || `Project ${projectId || 'local'}`,
-        description: project?.description || '',
-        files,
-        settings: project?.settings || {},
-      };
-      const result = await projectAPI.saveProject(payload);
-      toast.success('Saved to server');
-      if (setProject)
-        setProject((prev) => ({
-          ...(prev || {}),
-          _id: result._id || result.id,
-          ...result,
-        }));
-    } catch (err) {
-      console.error('Save to server failed', err);
-      toast.error(err?.message || 'Save to server failed');
-    }
-  };
-
+ 
   useEffect(() => {
     function onKey(e) {
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
@@ -447,7 +413,7 @@ export default function IDE({
       {/* Editor (main) with toolbar and tabs */}
       <div className="flex-1 border-r border-gray-700 min-h-0 flex flex-col">
         {/* Editor area */}
-        <div className="flex-1 min-h-0">
+        <div className="flex-1 min-h-0 h-full">
           {activeFile && (
             <CodeEditor
               ref={editorRef}

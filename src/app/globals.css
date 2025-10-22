@@ -91,34 +91,6 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: #777;
 }
-
-/* Sandpack optimizations */
-.sp-wrapper {
-  height: 100% !important;
-  font-family: 'Consolas', 'Monaco', 'Courier New', monospace !important;
-}
-
-.sp-close-button{
-  color :red;
-}
-
-.sp-layout {
-  height: 100% !important;
-}
-
-.sp-code-editor {
-  height: 100% !important;
-}
-
-.sp-preview-container {
-  height: 100% !important;
-}
-
-/* Remove unnecessary animations for better performance */
-.sp-loading {
-  animation: none !important;
-}
-
 /* Optimize button hover states */
 button {
   transition: background-color 0.15s ease, transform 0.1s ease;
@@ -151,20 +123,17 @@ button:active {
   height: 100%;
   width: 100%;
   position: relative;
-  /* Provide a neutral background unless Monaco or container supplies one */
   background: transparent;
   color: inherit;
   -webkit-font-smoothing: auto;
   -moz-osx-font-smoothing: auto;
 }
 
-/* Prevent large global transitions / transforms from affecting the editor UI or editor toolbars */
 .editor-isolation, .editor-isolation * {
   transition: none !important;
   transform: none !important;
 }
 
-/* Monaco places many elements inside .monaco-editor — give it a stable baseline */
 .editor-isolation .monaco-editor,
 .editor-isolation .monaco-editor * {
   box-sizing: border-box;
@@ -175,43 +144,6 @@ button:active {
 .editor-isolation textarea,
 .editor-isolation select {
   font-family: monospace !important;
-}
-
-/* IDE toolbar, tabs, and status bar */
-.ide-toolbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  padding: 8px 12px;
-  border-bottom: 1px solid var(--border);
-  background: var(--card);
-  color: var(--card-foreground);
-}
-
-.ide-tabs {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 8px;
-  border-bottom: 1px solid var(--border);
-  background: linear-gradient(180deg, rgba(0,0,0,0.03), transparent);
-}
-
-.ide-tab {
-  padding: 6px 10px;
-  border-radius: 4px;
-  background: transparent;
-  color: var(--card-foreground);
-  cursor: pointer;
-  display: inline-flex;
-  gap: 8px;
-  align-items: center;
-}
-
-.ide-tab.active {
-  background: linear-gradient(90deg, rgba(99,102,241,0.15), rgba(99,102,241,0.08));
-  border: 1px solid rgba(99,102,241,0.18);
 }
 
 .ide-statusbar {
@@ -272,23 +204,3 @@ button:active {
   padding: 6px 10px;
   border-radius: 6px;
 }
-
-/* Simple popover for 'More' menu in the toolbar */
-.ide-more-menu {
-  position: absolute;
-  top: calc(100% + 8px);
-  right: 0;
-  min-width: 160px;
-  background: var(--popover);
-  color: var(--popover-foreground);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 6px;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
-  z-index: 60;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.ide-more-menu .btn-ghost { width: 100%; text-align: left; padding: 6px 8px; }

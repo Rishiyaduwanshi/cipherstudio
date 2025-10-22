@@ -16,10 +16,6 @@ export default function EditorPage({ params }) {
   const [errorDetails, setErrorDetails] = useState(null);
   const [unauthenticated, setUnauthenticated] = useState(false);
 
-  // `params` may be a Promise-like proxy in newer Next.js versions.
-  // Unwrap with `React.use()` when available to avoid sync-access warnings
-  // and to support future Next.js behavior. Fall back to the provided
-  // `params` object when `React.use` is not available.
   const resolvedParams = typeof React.use === 'function' ? React.use(params) : params;
   const id = resolvedParams?.id;
 
@@ -28,14 +24,8 @@ export default function EditorPage({ params }) {
       setLoading(true);
       try {
         const proj = await fetchProjectById(id);
-
-        // Normalize 'files' shape from the server so the UI always receives
-        // an object with filePath -> { code } entries. Backend may return
-        // arrays, raw strings, or objects with different keys depending on
-        // server version; normalize those here.
         const normalizeFiles = (files) => {
           if (!files) return {};
-          // If backend returns an array of { path, code/content }
           if (Array.isArray(files)) {
             return files.reduce((acc, item) => {
               const path = item?.path || item?.filePath || item?.name || item?.filename || '/untitled';
@@ -45,7 +35,6 @@ export default function EditorPage({ params }) {
             }, {});
           }
 
-          // If backend returns an object, values may be strings or nested objects.
           if (typeof files === 'object') {
             const out = {};
             Object.entries(files).forEach(([k, v]) => {
@@ -68,7 +57,6 @@ export default function EditorPage({ params }) {
       } catch (err) {
         console.error('Error fetching project:', err);
         setErrorDetails(err?.response?.data || err);
-        // If unauthorized, redirect to signin so the user can authenticate
         if (
           (err && err.statusCode === 401) ||
           (err && err.status === 401) ||
@@ -77,13 +65,11 @@ export default function EditorPage({ params }) {
           console.warn(
             'Project fetch returned 401 — unauthenticated. Showing sign-in/demo options.'
           );
-          // Set unauthenticated so the UI can show a friendly call-to-action instead of forcing a redirect.
           setUnauthenticated(true);
           setLoading(false);
           return;
         }
 
-        // If server returned 404 or route not found, fall back to a local demo or cached temp project
         const msg =
           (err &&
             (err.message || err?.data?.message || 'Failed to load project')) ||
@@ -92,7 +78,7 @@ export default function EditorPage({ params }) {
           (err && (err.statusCode === 404 || err.status === 404)) ||
           /route not found/i.test(String(msg))
         ) {
-          // Try local temp project
+          
           try {
             const temp =
               typeof window !== 'undefined' &&
@@ -106,10 +92,10 @@ export default function EditorPage({ params }) {
               return;
             }
           } catch (e) {
-            // ignore localStorage parse errors
+            
           }
 
-          // final fallback to bundled demo files
+          
           setProject({
             name: 'Demo (fallback)',
             files: demoInitialFiles,
@@ -129,12 +115,12 @@ export default function EditorPage({ params }) {
     loadProject();
   }, [id, fetchProjectById, router]);
 
-  // Stable file-change callback: always declare hooks (useCallback) before any conditional returns
-  // so the order of hooks remains stable across renders.
+  
+  
   const handleFilesChange = useCallback(
     (files) => {
       setProject((prev) => {
-        // If files reference didn't change, skip updating state to avoid needless re-renders
+        
         if (prev && prev.files === files) return prev;
         return { ...(prev || {}), files };
       });
