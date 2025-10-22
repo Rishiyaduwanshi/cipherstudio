@@ -1,122 +1,20 @@
 export const initialFiles = {
-  '/public/index.html': {
-    code: `<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>CipherStudio</title>
-  </head>
-  <body>
-    <noscript>You need to enable JavaScript to run this app.</noscript>
-    <div id="root"></div>
-  </body>
-</html>`,
+  '/index.html': {
+    code: '<!DOCTYPE html>\n<html lang="en">\n<head>\n  <meta charset="UTF-8">\n  <meta name="viewport" content="width=device-width, initial-scale=1.0">\n  <title>CipherStudio Starter</title>\n  <link rel="stylesheet" href="/src/index.css">\n</head>\n<body>\n  <div id="root"></div>\n  <script type="module" src="/src/main.jsx"></script>\n</body>\n</html>',
   },
-
-  '/src/index.js': {
-    code: `import React from 'react';
-import ReactDOM from 'react-dom/client';
-import './index.css';
-import App from './App';
-
-const root = ReactDOM.createRoot(document.getElementById('root'));
-root.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
-);`,
-  },
-
-  '/src/App.js': {
-    code: `import React from 'react';
-import './App.css';
-
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <h1>Welcome to CipherStudio 👋</h1>
-        <p>Start editing to see live changes 🚀</p>
-        <p>Your React IDE is ready!</p>
-      </header>
-    </div>
-  );
-}
-
-export default App;`,
-  },
-
-  '/src/App.css': {
-    code: `.App {
-  text-align: center;
-}
-
-.App-header {
-  background-color: #282c34;
-  padding: 20px;
-  color: white;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-}
-
-h1 {
-  margin: 0.5rem 0;
-}
-
-p {
-  margin: 0.5rem 0;
-}`,
-  },
-
-  '/src/index.css': {
-    code: `body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
-}`,
-  },
-
   '/package.json': {
-    code: `{
-  "name": "cipherstudio-project",
-  "version": "0.1.0",
-  "private": true,
-  "dependencies": {
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "react-scripts": "5.0.1"
+    code: '{\n  "name": "cipherstudio-starter",\n  "version": "1.0.0",\n  "private": true,\n  "type": "module",\n  "dependencies": {\n    "react": "^19.1.1",\n    "react-dom": "^19.1.1"\n  },\n  "devDependencies": {\n    "vite": "^5.0.0"\n  },\n  "scripts": {\n    "dev": "vite",\n    "build": "vite build",\n    "preview": "vite preview"\n  }\n}',
   },
-  "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
+  '/src/main.jsx': {
+    code: "import React from 'react';\nimport { createRoot } from 'react-dom/client';\nimport App from './App.jsx';\nimport './index.css';\n\nconst root = createRoot(document.getElementById('root'));\nroot.render(<App />);",
   },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
-  }
-}`
-  }
+  '/src/App.jsx': {
+    code: "import React, { useState } from 'react';\nimport '/src/App.css';\n\nfunction App() {\n  const [counter, setCounter] = useState(0);\n\n  const increment = () => setCounter(prev => prev + 1);\n\n  return (\n    <div className=\"App\">\n      <h1>Hello CipherStudio 👋</h1>\n      <p>Start editing to see live changes 🚀</p>\n      <p>Counter: {counter}</p>\n      <button onClick={increment}>Increase</button>\n    </div>\n  );\n}\n\nexport default App;",
+  },
+  '/src/App.css': {
+    code: "body {\n  font-family: 'Inter', sans-serif;\n  margin: 0;\n  padding: 0;\n  background: linear-gradient(to bottom right, #19191a, #05070a);\n  min-height: 100vh;\n  display: flex;\n  justify-content: center;\n  align-items: center;\n}\n\n.App {\n  background: rgb(12, 10, 10);\n  padding: 2rem 3rem;\n  border-radius: 12px;\n  box-shadow: 0 8px 20px rgba(0,0,0,0.1);\n  text-align: center;\n}\n\nh1 {\n  font-size: 2rem;\n  color: #fff;\n  margin-bottom: 0.5rem;\n}\n\np {\n  font-size: 1.1rem;\n  color: #fff;\n  margin-bottom: 1rem;\n}\n\nbutton {\n  padding: 0.6rem 1.2rem;\n  background-color: #4f46e5;\n  color: rgb(221, 221, 221);\n  border: none;\n  border-radius: 6px;\n  cursor: pointer;\n}\n\nbutton:hover {\n  background-color: #4338ca;\n}",
+  },
+  '/src/index.css': {
+    code: '* {\n  box-sizing: border-box;\n  margin: 0;\n  padding: 0;\n  \n}\n\n',
+  },
 };
