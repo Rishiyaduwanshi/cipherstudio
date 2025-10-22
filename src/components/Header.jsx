@@ -20,9 +20,13 @@ export default function Header() {
       style={{ background: 'var(--card)', color: 'var(--card-foreground)' }}
     >
       <div className="flex items-center gap-4">
-        <Link href="/" className="font-bold text-lg">CipherStudio</Link>
+        <Link href="/" className="font-bold text-lg">
+          CipherStudio
+        </Link>
         <nav className="flex gap-3 text-sm ml-4">
-          <Link href="/projects" className="hidden md:inline">Projects</Link>
+          <Link href="/projects" className="hidden md:inline">
+            Projects
+          </Link>
         </nav>
       </div>
       <div className="flex items-center gap-3">
@@ -41,7 +45,10 @@ export default function Header() {
             <Link href="/signin" className="text-sm px-2 py-1 border rounded">
               Sign in
             </Link>
-            <Link href="/signup" className="text-sm px-2 py-1 border rounded bg-green-600 text-white hover:bg-green-700">
+            <Link
+              href="/signup"
+              className="text-sm px-2 py-1 border rounded bg-green-600 text-white hover:bg-green-700"
+            >
               Sign up
             </Link>
           </div>

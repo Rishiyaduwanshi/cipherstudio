@@ -1,11 +1,9 @@
 'use client';
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import { LiveProvider, LivePreview as RLPreview, LiveError as RLLiveError } from 'react-live';
 
 export default function LivePreview({ files = {} }) {
-  const [showGenerated, setShowGenerated] = useState(false);
 
-  // Unique wrapper class to scope injected CSS for this preview instance.
   const previewWrapper = React.useMemo(() => `live-preview-${Math.random().toString(36).slice(2,8)}`, []);
   const scopeCss = (rawCss, wrapper) => {
     if (!rawCss) return '';
@@ -32,7 +30,6 @@ export default function LivePreview({ files = {} }) {
     return css;
   };
 
-  // Detect CommonJS patterns that cannot be executed directly in the browser preview
   const { hasCommonJS, commonJsFiles } = useMemo(() => {
     const entries = Object.entries(files || {});
     const commons = entries
@@ -45,6 +42,10 @@ export default function LivePreview({ files = {} }) {
   }, [JSON.stringify(files)]);
 
   const liveCode = useMemo(() => {
+    
+    const jsFiles = Object.keys(files).filter(path => /\.(js|jsx)$/.test(path));
+    
+    
     const entryCandidates = ['/src/main.jsx', '/src/index.jsx', '/src/main.js', '/src/index.js'];
     const entry = entryCandidates.find((p) => files[p]);
     if (!entry) return null;
@@ -53,21 +54,32 @@ export default function LivePreview({ files = {} }) {
     const appPath = appCandidates.find((p) => files[p]);
     if (!appPath) return null;
 
+    
     let appCode = (files[appPath] && (files[appPath].code || '')) || '';
-  // strip css imports from app code
+    
+    
+    const cssImports = new Map();
+    for (const jsFile of jsFiles) {
+      const code = files[jsFile]?.code || '';
+      const matches = code.matchAll(/^import\s+['"](.+?\.css)['"];?$/gm);
+      for (const match of matches) {
+        const cssPath = match[1].startsWith('/') ? match[1] : `/src/${match[1]}`;
+        if (files[cssPath]) {
+          cssImports.set(jsFile, [...(cssImports.get(jsFile) || []), cssPath]);
+        }
+      }
+    }
+  
   appCode = appCode.replace(/^import\s+['"].+?\.css['"];?$/gm, '');
-  // remove the Next 'use client' directive if present
+  
   appCode = appCode.replace(/^\s*['"]use client['"];?\s*/m, '');
-  // remove top-level non-relative imports (modules from node_modules) — keep relative imports for now
+  
   appCode = appCode.replace(/^import\s+[^;]+from\s+['"](?![\.\/]).+?['"];?\s*$/gm, '');
   appCode = appCode.replace(/^import\s+['"](?![\.\/]).+?['"];?\s*$/gm, '');
-  // convert default export to a unique binding name
+  
   appCode = appCode.replace(/export\s+default\s+/, 'const __APP__ = ');
-  // strip other export keywords (named exports) so the inlined code is executable
+ 
   appCode = appCode.replace(/^\s*export\s+/gm, '');
-
-  // If the app code used named React imports (useState, useEffect, ...),
-  // replace those identifiers with React.<hook> so they resolve from the provided scope.
   const reactHookNames = [
     'useState', 'useEffect', 'useRef', 'useMemo', 'useCallback', 'useContext',
     'useReducer', 'useLayoutEffect', 'useImperativeHandle', 'useDebugValue'
@@ -77,15 +89,42 @@ export default function LivePreview({ files = {} }) {
     appCode = appCode.replace(re, `React.${hook}`);
   });
 
-  // gather css from known locations and scope it to the preview wrapper
-  const cssSources = ['/src/index.css', '/src/App.css', '/index.css'];
-  const cssText = cssSources.map((k) => (files[k] && (files[k].code || '')) || '').filter(Boolean).join('\n');
+  
+  const relevantCssSources = new Set();
+  const processedFiles = new Set();
+
+  const addCssForFile = (jsFile) => {
+    if (processedFiles.has(jsFile)) return;
+    processedFiles.add(jsFile);
+    
+    
+    const cssFiles = cssImports.get(jsFile) || [];
+    cssFiles.forEach(css => relevantCssSources.add(css));
+    
+    
+    const code = files[jsFile]?.code || '';
+    const importMatches = code.matchAll(/^import.+?from\s+['"](.+?\.jsx?)['"];?$/gm);
+    for (const match of Array.from(importMatches)) {
+      const importPath = match[1].startsWith('/') ? match[1] : `/src/${match[1]}`;
+      if (files[importPath]) {
+        addCssForFile(importPath);
+      }
+    }
+  };
+
+  
+  addCssForFile(appPath);
+
+  const cssText = Array.from(relevantCssSources)
+    .map(k => (files[k] && (files[k].code || '')) || '')
+    .filter(Boolean)
+    .join('\n');
   const scoped = scopeCss(cssText || '', previewWrapper);
   const cssStr = JSON.stringify(scoped || '');
 
   const cssInjector = `function __INJECT_CSS(){ React.useEffect(()=>{ if(typeof document !== 'undefined'){ const s=document.createElement('style'); s.setAttribute('data-live-scope','${previewWrapper}'); s.textContent = ${cssStr}; document.head.appendChild(s); return ()=>{ try{ document.head.removeChild(s); }catch(e){} }; } }, []); return null; }`;
 
-    // Small shim so projects that accidentally use `require()` receive a clear error message
+    
     const requireShim = `const require = (name) => { throw new Error('require() is not supported in the in-browser preview. Convert to ESM imports or run the project in a bundler/server.'); }; const module = { exports: {} }; const exports = module.exports;`;
 
   const final = `(() => {\n${requireShim}\n${appCode}\n\n${cssInjector}\n\n  return React.createElement(React.Fragment, null, React.createElement(__INJECT_CSS, null), React.createElement('div', { className: '${previewWrapper}' }, React.createElement(__APP__, null)));\n})()`;
@@ -94,8 +133,8 @@ export default function LivePreview({ files = {} }) {
 
   const scope = useMemo(() => ({ React }), []);
 
-  // If any file uses CommonJS (require/module.exports), don't attempt to evaluate
-  // the project with react-live. Show a helpful message instead.
+  
+  
   if (hasCommonJS) {
     return (
       <div className="h-full w-full flex flex-col items-center justify-center p-6 text-sm">
@@ -125,7 +164,7 @@ export default function LivePreview({ files = {} }) {
   }
 
   if (!liveCode) {
-    // fallback: if the project provided a static /index.html, render it in an iframe
+    
     if (files['/index.html'] && files['/index.html'].code) {
       return (
         <iframe
@@ -140,22 +179,10 @@ export default function LivePreview({ files = {} }) {
 
   return (
     <div className="h-full w-full">
-      <div className="flex items-center justify-end p-2">
-        <button
-          type="button"
-          onClick={() => setShowGenerated((s) => !s)}
-          className="text-xs px-2 py-1 border rounded bg-slate-800 text-slate-200"
-        >
-          {showGenerated ? 'Hide preview code' : 'Show preview code'}
-        </button>
-      </div>
       <LiveProvider code={liveCode} scope={scope} noInline={false}>
         <div className="h-full w-full overflow-auto p-2">
           <RLPreview />
           <RLLiveError />
-          {showGenerated ? (
-            <pre className="mt-3 p-3 bg-black text-xs text-white overflow-auto max-h-80">{liveCode}</pre>
-          ) : null}
         </div>
       </LiveProvider>
     </div>

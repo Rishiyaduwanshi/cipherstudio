@@ -7,18 +7,11 @@ export default function Home() {
   const router = useRouter();
   const { user, loading: authLoading, isAuthenticated } = useAuthStore();
 
-  const [currentView, setCurrentView] = useState('landing'); // 'landing', 'editor'
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
     setIsMounted(true);
   }, []);
-
-  useEffect(() => {
-    if (isMounted && !authLoading && isAuthenticated()) {
-      router.push('/projects'); 
-    }
-  }, [isMounted, authLoading, isAuthenticated, router]);
 
   const handleGetStarted = () => {
     if (isAuthenticated()) {

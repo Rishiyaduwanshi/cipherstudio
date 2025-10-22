@@ -49,7 +49,6 @@ export default function IDE({
   useEffect(() => {
     if (!projectId) return;
     if (lastProjectIdRef.current === projectId) return;
-    // new project loaded, adopt files
     if (initialFiles && Object.keys(initialFiles).length) {
       applyingInitialRef.current = true;
       setFiles(initialFiles);
@@ -79,17 +78,28 @@ export default function IDE({
   };
 
   const handleCodeChange = (newCode) => {
-    setFiles((prev) => {
-      const updated = {
-        ...prev,
-        [activeFile]: { ...prev[activeFile], code: newCode },
-      };
-      // Save to localStorage
-      try {
-        localStorage.setItem('cipherstudio-temp', JSON.stringify({ files: updated }));
-      } catch (e) {}
-      return updated;
-    });
+    const updatedFiles = {
+      ...files,
+      [activeFile]: { ...files[activeFile], code: newCode },
+    };
+    
+    // Update files state
+    setFiles(updatedFiles);
+    
+    // Update project files if available
+    if (project && setProject) {
+      setProject(prevProject => ({
+        ...prevProject,
+        files: updatedFiles
+      }));
+    }
+    
+    // Save to localStorage
+    try {
+      localStorage.setItem('cipherstudio-temp', JSON.stringify({ files: updatedFiles }));
+    } catch (e) {}
+    
+    // Mark file as dirty
     setDirtyFiles((prev) => ({ ...prev, [activeFile]: true }));
   };
 
