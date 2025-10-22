@@ -35,7 +35,7 @@ export default function Header() {
             <span className="text-sm">{user?.name || user?.email}</span>
             <button
               onClick={handleLogout}
-              className="text-sm px-2 py-1 border rounded"
+              className="text-sm px-2 py-1 border rounded bg-red-600"
             >
               Signout
             </button>

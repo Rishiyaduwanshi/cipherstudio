@@ -5,6 +5,7 @@ import { toast } from 'react-toastify';
 import projectAPI from '@/services/projectAPI';
 import { useRouter } from 'next/navigation';
 import CreateProjectModal from './CreateProjectModal';
+import DownloadButton from './DownloadButton';
 
 export default function ProjectManager({ project, setProject }) {
   const [showProjectModal, setShowProjectModal] = useState(false);
@@ -161,7 +162,7 @@ export default function ProjectManager({ project, setProject }) {
                 onClick={saveProjectAs}
                 className="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700"
               >
-                Save As
+                Save to Local
               </button>
               <button
                 onClick={saveProjectToServer}
@@ -177,29 +178,7 @@ export default function ProjectManager({ project, setProject }) {
                 Load Project
               </button>
 
-              <button
-                onClick={() => {
-                  try {
-                    const blob = new Blob(
-                      [JSON.stringify(project || {}, null, 2)],
-                      { type: 'application/json' }
-                    );
-                    const url = URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = `${project?.name || 'project'}-project.json`;
-                    a.click();
-                    URL.revokeObjectURL(url);
-                    toast.success('Downloaded project');
-                  } catch (e) {
-                    console.error('Download failed', e);
-                    toast.error('Download failed');
-                  }
-                }}
-                className="px-3 py-1 bg-gray-600 text-white rounded text-sm hover:bg-gray-700"
-              >
-                Download
-              </button>
+              <DownloadButton project={project} />
             </>
           )}
         </div>
