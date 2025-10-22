@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { toast } from 'react-toastify';
-import projectAPI from '../services/projectAPI';
+import * as projectAPI from '../services/projectAPI';
 
 const useProjectStore = create((set) => ({
   projects: [],
@@ -12,10 +12,13 @@ const useProjectStore = create((set) => ({
     try {
       const projects = await projectAPI.getProjects();
       set({ projects: projects || [], loading: false });
-      toast.success('Projects loaded successfully');
       return projects;
     } catch (error) {
       set({ loading: false });
+      if (error.status === 401) {
+        window.location.href = '/signin';
+        return;
+      }
       toast.error(error.message || 'Failed to load projects');
       throw error;
     }
@@ -25,12 +28,17 @@ const useProjectStore = create((set) => ({
     set({ loading: true });
     try {
       const created = await projectAPI.createProject(projectData);
-      set((state) => ({ projects: [...state.projects, created], loading: false }));
-      toast.success('Project created successfully');
+      set((state) => ({ 
+        projects: [...state.projects, created], 
+        loading: false 
+      }));
       return created;
     } catch (error) {
       set({ loading: false });
-      toast.error(error.message || 'Failed to create project');
+      if (error.status === 401) {
+        window.location.href = '/signin';
+        return;
+      }
       throw error;
     }
   },
@@ -40,14 +48,21 @@ const useProjectStore = create((set) => ({
     try {
       const project = await projectAPI.getProject(projectId);
       set({ currentProject: project, loading: false });
-      toast.success('Project loaded successfully');
       return project;
     } catch (error) {
       set({ loading: false });
-      toast.error(error.message || 'Failed to load project');
+      if (error.status === 401) {
+        window.location.href = '/signin';
+        return;
+      }
+      if (error.status === 404) {
+        toast.error('Project not found');
+        return null;
+      }
       throw error;
     }
   },
+
   updateProject: async (projectId, updates) => {
     set({ loading: true });
     try {
@@ -57,11 +72,32 @@ const useProjectStore = create((set) => ({
         currentProject: state.currentProject && state.currentProject._id === updated._id ? updated : state.currentProject,
         loading: false,
       }));
-      toast.success('Project updated successfully');
       return updated;
     } catch (error) {
       set({ loading: false });
-      toast.error(error.message || 'Failed to update project');
+      if (error.status === 401) {
+        window.location.href = '/signin';
+        return;
+      }
+      throw error;
+    }
+  },
+
+  deleteProject: async (projectId) => {
+    set({ loading: true });
+    try {
+      await projectAPI.deleteProject(projectId);
+      set((state) => ({
+        projects: state.projects.filter((p) => p._id !== projectId),
+        currentProject: state.currentProject && state.currentProject._id === projectId ? null : state.currentProject,
+        loading: false,
+      }));
+    } catch (error) {
+      set({ loading: false });
+      if (error.status === 401) {
+        window.location.href = '/signin';
+        return;
+      }
       throw error;
     }
   },

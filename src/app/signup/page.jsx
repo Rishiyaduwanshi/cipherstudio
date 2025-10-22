@@ -19,7 +19,7 @@ export default function SignUpPage() {
     setLoading(false);
     if (res && res.success) {
       toast.success('Account created');
-      router.push('/dashboard');
+      router.push('/projects');
     } else {
       toast.error(res.error || 'Registration failed');
     }

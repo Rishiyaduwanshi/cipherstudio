@@ -7,37 +7,26 @@ export default function LivePreview({ files = {} }) {
 
   // Unique wrapper class to scope injected CSS for this preview instance.
   const previewWrapper = React.useMemo(() => `live-preview-${Math.random().toString(36).slice(2,8)}`, []);
-
-  // Basic CSS scoping helper: prefix selectors with the wrapper class and
-  // convert :root/html/body occurrences to the wrapper so variables and
-  // global rules do not leak into the main application.
   const scopeCss = (rawCss, wrapper) => {
     if (!rawCss) return '';
     let css = String(rawCss);
-    // Replace :root with the wrapper so CSS variables are scoped
     css = css.replace(/:root/g, `.${wrapper}`);
-    // Replace top-level html/body selectors with wrapper
     css = css.replace(/(^|[,\s])html(\b)/g, `$1.${wrapper}$2`);
     css = css.replace(/(^|[,\s])body(\b)/g, `$1.${wrapper}$2`);
 
-    // Prefix ordinary selectors (skip @ rules and keyframes)
     try {
       css = css.replace(/(^|\})\s*([^@{}][^{]+)\s*\{/g, (m, p1, selectors) => {
         const scoped = selectors.split(',').map(s => {
           const raw = s.trim();
           if (!raw) return '';
-          // leave selectors already scoped
           if (raw.startsWith(`.${wrapper}`)) return raw;
-          // skip keyframe steps like 'from' / 'to'
           if (/^(from|to|\d+%)/.test(raw)) return raw;
-          // keep universal/global at-rules as-is
           if (raw.startsWith('@')) return raw;
           return `.${wrapper} ${raw}`;
         }).join(', ');
         return `${p1} ${scoped} {`;
       });
     } catch (e) {
-      // if scoping fails for some complex CSS, fall back to original CSS
       return rawCss;
     }
     return css;

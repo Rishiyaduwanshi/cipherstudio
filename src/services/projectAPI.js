@@ -22,11 +22,16 @@ const PROJECTS_URL = `${API_ROOT}/projects`;
 export const getProjects = async (params = {}) => {
   try {
     const response = await axios.get(PROJECTS_URL, { withCredentials: true, params });
-  // server response shape: { message, statusCode, success, data: { projects } }
-  return response.data.data.projects || [];
+    // server response shape: { message, statusCode, success, data: { projects } }
+    if (!response.data.success) {
+      throw new Error(response.data.message);
+    }
+    return response.data.data.projects || [];
   } catch (error) {
     console.error('Error fetching projects:', error);
-    throw error.response?.data || { message: 'Failed to fetch projects' };
+    const responseError = error.response?.data || { message: 'Failed to fetch projects', status: error.response?.status };
+    responseError.status = error.response?.status;
+    throw responseError;
   }
 };
 
@@ -77,10 +82,15 @@ export const getProject = async (projectId) => {
 export const createProject = async (projectData) => {
   try {
     const response = await axios.post(PROJECTS_URL, projectData, { withCredentials: true });
+    if (!response.data.success) {
+      throw new Error(response.data.message);
+    }
     return response.data.data.project;
   } catch (error) {
     console.error('Error creating project:', error);
-    throw error.response?.data || { message: 'Failed to create project' };
+    const responseError = error.response?.data || { message: 'Failed to create project', status: error.response?.status };
+    responseError.status = error.response?.status;
+    throw responseError;
   }
 };
 
@@ -97,6 +107,9 @@ export const updateProject = async (projectId, updates) => {
 export const deleteProject = async (projectId) => {
   try {
     const response = await axios.delete(`${PROJECTS_URL}/${projectId}`, { withCredentials: true });
+    if (!response.data.success) {
+      throw new Error(response.data.message);
+    }
     return response.data;
   } catch (error) {
     console.error('Error deleting project:', error);

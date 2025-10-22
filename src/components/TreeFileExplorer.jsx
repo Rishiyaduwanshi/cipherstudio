@@ -33,6 +33,20 @@ export default function TreeFileExplorer({ files, onAddFile, onDeleteFile, onAdd
 
   const closeContextMenu = () => setContextMenu(null);
 
+  // Show the new file input for a folder (used by header buttons and context menu)
+  const handleAddNewFile = (folderPath = '/') => {
+    setShowNewFileInput(folderPath || '/');
+    setNewFileName('');
+    closeContextMenu();
+  };
+
+  // Show the new folder input for a parent folder
+  const handleAddNewFolder = (parentPath = '/') => {
+    setShowNewFolderInput(parentPath || '/');
+    setNewFolderName('');
+    closeContextMenu();
+  };
+
   const handleDeleteFile = (filePath) => {
     if (!filePath) return;
     // Ask for confirmation before deleting. If cancelled, just close the context menu.

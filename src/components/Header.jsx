@@ -22,9 +22,7 @@ export default function Header() {
       <div className="flex items-center gap-4">
         <Link href="/" className="font-bold text-lg">CipherStudio</Link>
         <nav className="flex gap-3 text-sm ml-4">
-          <Link href="/dashboard" className="hidden md:inline">Dashboard</Link>
           <Link href="/projects" className="hidden md:inline">Projects</Link>
-          <Link href="/ide" className="hidden md:inline">IDE</Link>
         </nav>
       </div>
       <div className="flex items-center gap-3">

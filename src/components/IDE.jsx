@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect, useRef } from 'react';
 import projectAPI from '@/services/projectAPI';
+import useAuthStore from '@/stores/authStore';
 import { toast } from 'react-toastify';
 import TreeFileExplorer from './TreeFileExplorer';
 import CodeEditor from './CodeEditor';
@@ -78,10 +79,17 @@ export default function IDE({
   };
 
   const handleCodeChange = (newCode) => {
-    setFiles((prev) => ({
-      ...prev,
-      [activeFile]: { ...prev[activeFile], code: newCode },
-    }));
+    setFiles((prev) => {
+      const updated = {
+        ...prev,
+        [activeFile]: { ...prev[activeFile], code: newCode },
+      };
+      // Save to localStorage
+      try {
+        localStorage.setItem('cipherstudio-temp', JSON.stringify({ files: updated }));
+      } catch (e) {}
+      return updated;
+    });
     setDirtyFiles((prev) => ({ ...prev, [activeFile]: true }));
   };
 
@@ -96,6 +104,10 @@ export default function IDE({
   const handleAddFile = (filePath, content = '') => {
     setFiles((prev) => {
       const updated = { ...prev, [filePath]: { code: content } };
+      // Save to localStorage
+      try {
+        localStorage.setItem('cipherstudio-temp', JSON.stringify({ files: updated }));
+      } catch (e) {}
       return updated;
     });
     setActiveFile(filePath);
@@ -103,7 +115,6 @@ export default function IDE({
       prev.includes(filePath) ? prev : [...prev, filePath]
     );
     setDirtyFiles((prev) => ({ ...prev, [filePath]: false }));
-    // update project context if present
     if (project && setProject) {
       setProject((prev) => ({
         ...(prev || {}),
@@ -115,10 +126,8 @@ export default function IDE({
   const handleDeleteFile = (filePath) => {
     setFiles((prev) => {
       const copy = { ...prev };
-      // if path corresponds to a folder (no extension) remove all children
       const isFolder = !/\.[\w\d]+$/.test(filePath);
       if (isFolder) {
-        // delete all keys that start with folder path (ensure trailing slash)
         const prefix = filePath.endsWith('/') ? filePath : `${filePath}/`;
         Object.keys(copy).forEach((k) => {
           if (k === filePath || k.startsWith(prefix)) delete copy[k];
@@ -126,9 +135,12 @@ export default function IDE({
       } else {
         delete copy[filePath];
       }
+      // Save to localStorage
+      try {
+        localStorage.setItem('cipherstudio-temp', JSON.stringify({ files: copy }));
+      } catch (e) {}
       return copy;
     });
-    // cleanup tabs & dirty flags
     setOpenTabs((prev) =>
       prev.filter((t) => !(t === filePath || t.startsWith(`${filePath}/`)))
     );
@@ -149,7 +161,6 @@ export default function IDE({
       }
       return prev;
     });
-    // Update project context
     if (project && setProject) {
       setProject((prev) => {
         if (!prev) return prev;
@@ -188,15 +199,13 @@ export default function IDE({
 
     // check collisions
     if (isFolder) {
-      // any existing file with newBase prefix?
       const collides = Object.keys(files || {}).some(
         (k) => k === newBase || k.startsWith(`${newBase}/`)
       );
       if (collides) {
-        toast.error('Rename failed: target folder already exists');
+        // Show error in UI, not toast
         return;
       }
-      // perform rename for all children
       setFiles((prev) => {
         const copy = { ...prev };
         const prefix = oldPath.endsWith('/') ? oldPath : `${oldPath}/`;
@@ -208,9 +217,12 @@ export default function IDE({
             delete copy[k];
           }
         });
+        // Save to localStorage
+        try {
+          localStorage.setItem('cipherstudio-temp', JSON.stringify({ files: copy }));
+        } catch (e) {}
         return copy;
       });
-      // update openTabs and activeFile
       setOpenTabs((prev) =>
         prev.map((t) =>
           t === oldPath || t.startsWith(`${oldPath}/`)
@@ -223,7 +235,6 @@ export default function IDE({
           ? prev.replace(oldPath, newBase)
           : prev
       );
-      // update project
       if (project && setProject) {
         setProject((prev) => {
           if (!prev) return prev;
@@ -240,22 +251,25 @@ export default function IDE({
           return { ...prev, files: copy };
         });
       }
-      toast.success('Folder renamed');
+  // Optionally show success in UI, not toast
     } else {
-      // file rename
       const newPath = `${parent === '/' ? '' : parent}/${newName}`.replace(
         /\/+/g,
         '/'
       );
       if (newPath === oldPath) return;
       if (files[newPath]) {
-        toast.error('Rename failed: target file already exists');
+        // Show error in UI, not toast
         return;
       }
       setFiles((prev) => {
         const copy = { ...prev };
         copy[newPath] = copy[oldPath];
         delete copy[oldPath];
+        // Save to localStorage
+        try {
+          localStorage.setItem('cipherstudio-temp', JSON.stringify({ files: copy }));
+        } catch (e) {}
         return copy;
       });
       setOpenTabs((prev) => prev.map((t) => (t === oldPath ? newPath : t)));
@@ -269,7 +283,7 @@ export default function IDE({
           return { ...prev, files: copy };
         });
       }
-      toast.success('File renamed');
+  // Optionally show success in UI, not toast
     }
   };
 
@@ -283,7 +297,7 @@ export default function IDE({
       }));
       // mark as saved
       setDirtyFiles((prev) => ({ ...prev, [activeFile]: false }));
-      toast.success('Saved (local)');
+  // Optionally show success in UI, not toast
       // If project context exists, update parent's project files and optionally autosave to server
       if (project && setProject) {
         const updated = {
@@ -298,9 +312,18 @@ export default function IDE({
     }
   };
 
+  const auth = useAuthStore();
   const handleSaveToServer = async () => {
     if (!project && !projectId) {
       toast.error('Cannot save to server: no project context');
+      return;
+    }
+    if (!auth.isAuthenticated()) {
+      toast.info('Please sign in to save your project to the server.');
+      // Optionally, redirect to signin page:
+      try {
+        window.location.href = '/signin';
+      } catch (e) {}
       return;
     }
     try {
@@ -313,7 +336,6 @@ export default function IDE({
       };
       const result = await projectAPI.saveProject(payload);
       toast.success('Saved to server');
-      // Update project id/local data
       if (setProject)
         setProject((prev) => ({
           ...(prev || {}),
@@ -352,7 +374,7 @@ export default function IDE({
       }
       // clear dirty flags after local save
       setDirtyFiles({});
-      toast.info('Auto-saved');
+  // Optionally show autosave in UI, not toast
     }, 5000);
     return () => clearInterval(t);
   }, [autoSave, dirtyFiles, files, project, setProject]);

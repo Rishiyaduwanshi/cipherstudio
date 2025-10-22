@@ -30,15 +30,17 @@ export default function ProjectManager({ project, setProject }) {
 
     try {
       const projectToSave = {
-        _id: project._id || project.id,
         name: projectName.trim(),
         description: projectDescription.trim(),
-        files: project.files,
+        files: project?.files || initialFiles,
         visibility: isPublic ? 'public' : 'private',
-        settings: project.settings || { framework: 'react' },
+        settings: project?.settings || { framework: 'react' },
       };
 
-  const savedProject = await projectAPI.saveProject(projectToSave);
+      // If project has an ID, update it, otherwise create new
+      const savedProject = project?._id ? 
+        await projectAPI.updateProject(project._id, projectToSave) :
+        await projectAPI.createProject(projectToSave);
 
       // Update local project with server data
       setProject({
@@ -79,19 +81,25 @@ export default function ProjectManager({ project, setProject }) {
     }
   };
 
-  // Create new project
+  // Create new project (local only)
   const handleNewProject = () => {
-    if (projectName.trim()) {
-      const newProject = {
-        name: projectName,
-        files: initialFiles
-      };
-      
-      setProject(newProject);
-      localStorage.setItem('cipherstudio-project', JSON.stringify(newProject));
-      setProjectName('');
-      setShowProjectModal(false);
-    }
+    if (!projectName.trim()) return;
+    const localProject = {
+      name: projectName.trim(),
+      description: projectDescription.trim() || '',
+      files: initialFiles,
+      visibility: isPublic ? 'public' : 'private',
+      settings: { framework: 'react' },
+    };
+    setProject(localProject);
+    try {
+      localStorage.setItem('cipherstudio-temp', JSON.stringify(localProject));
+    } catch (e) {}
+    setShowProjectModal(false);
+    setProjectName('');
+    setProjectDescription('');
+    setIsPublic(false);
+  try { router.push('/projects'); } catch (e) {}
   };
 
   // Load projects from database
@@ -169,15 +177,22 @@ export default function ProjectManager({ project, setProject }) {
     if (!project) return;
     setSaving(true);
     try {
-      const saved = await projectAPI.saveProject(project);
+      const savedProject = project._id ? 
+        await projectAPI.updateProject(project._id, project) :
+        await projectAPI.createProject(project);
+        
       // update current project with server response
-      setProject(prev => ({ ...(prev || {}), _id: saved._id || saved.id, name: saved.name }));
+      setProject(prev => ({ ...(prev || {}), ...savedProject }));
       toast.success('Project saved to server');
       // refresh list so it includes server project
       await loadSavedProjects();
     } catch (e) {
       console.error('Save to server failed', e);
-      toast.error(e?.message || 'Failed to save to server');
+      if (e?.response?.status === 401) {
+        router.push('/signin');
+        return;
+      }
+      toast.error(e?.response?.data?.message || e?.message || 'Failed to save to server');
     } finally {
       setSaving(false);
     }
@@ -219,32 +234,66 @@ export default function ProjectManager({ project, setProject }) {
   return (
     <>
       {/* Project Actions */}
-      <div className="flex items-center space-x-2">
-        <button
-          onClick={() => setShowProjectModal(true)}
-          className="px-3 py-1 bg-green-600 text-white rounded text-sm hover:bg-green-700"
-        >
-          New Project
-        </button>
-        <button
-          onClick={saveProjectAs}
-          className="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700"
-        >
-          Save As
-        </button>
-        <button
-          onClick={saveProjectToServer}
-          disabled={saving}
-          className="px-3 py-1 bg-indigo-600 text-white rounded text-sm hover:bg-indigo-700 disabled:opacity-60"
-        >
-          {saving ? 'Saving...' : 'Save to Server'}
-        </button>
-        <button
-          onClick={loadSavedProjects}
-          className="px-3 py-1 bg-purple-600 text-white rounded text-sm hover:bg-purple-700"
-        >
-          Load Project
-        </button>
+      <div className="space-y-6">
+        <div className="flex items-center space-x-2">
+          <button
+            onClick={() => setShowProjectModal(true)}
+            className="px-3 py-1 bg-green-600 text-white rounded text-sm hover:bg-green-700"
+          >
+            New Project
+          </button>
+          {project && (
+            <>
+              <button
+                onClick={saveProjectAs}
+                className="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700"
+              >
+                Save As
+              </button>
+              <button
+                onClick={saveProjectToServer}
+                disabled={saving}
+                className="px-3 py-1 bg-indigo-600 text-white rounded text-sm hover:bg-indigo-700 disabled:opacity-60"
+              >
+                {saving ? 'Saving...' : 'Save to Server'}
+              </button>
+              <button
+                onClick={loadSavedProjects}
+                className="px-3 py-1 bg-purple-600 text-white rounded text-sm hover:bg-purple-700"
+              >
+                Load Project
+              </button>
+            </>
+          )}
+        </div>
+
+        {/* Projects Grid */}
+        {savedProjects.length > 0 && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {savedProjects.map((proj) => (
+              <div 
+                key={proj.listId}
+                className="bg-gray-800 p-4 rounded-lg hover:bg-gray-700 cursor-pointer transition-colors"
+                onClick={() => {
+                  if (proj.source === 'server') loadServerProject(proj.id);
+                  else loadLocalProject(proj.storageKey);
+                }}
+              >
+                <h3 className="text-white font-medium mb-2">{proj.name}</h3>
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-400 text-sm">
+                    {Object.keys(proj.files || {}).length} files
+                  </span>
+                  <span className={`text-xs px-2 py-1 rounded ${
+                    proj.source === 'server' ? 'bg-blue-600' : 'bg-gray-600'
+                  }`}>
+                    {proj.source === 'server' ? 'Server' : 'Local'}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
         <button
           onClick={() => {
             try {

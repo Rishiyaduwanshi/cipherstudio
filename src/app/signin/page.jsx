@@ -24,7 +24,7 @@ export default function SignInPage() {
     setLoading(false);
     if (res && res.success) {
       toast.success('Signed in');
-      router.push('/dashboard');
+      router.push('/projects');
     } else {
       // Show server message if available, and log detailed payload for debugging
       console.error('Sign-in failed response:', res?.details || res);
