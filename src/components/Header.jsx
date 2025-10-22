@@ -43,12 +43,12 @@ export default function Header() {
           </>
         ) : (
           <div className="flex items-center gap-2">
-            <Link href="/signin" className="text-sm px-2 py-1 border rounded">
+            <Link href="/signin" className="text-sm px-2 py-1 border rounded hover:bg-secondary transition-colors">
               Sign in
             </Link>
             <Link
               href="/signup"
-              className="text-sm px-2 py-1 border rounded bg-green-600 text-white hover:bg-green-700"
+              className="text-sm px-2 py-1 border rounded bg-success text-white hover:bg-success-hover transition-colors"
             >
               Sign up
             </Link>

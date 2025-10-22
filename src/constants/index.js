@@ -46,13 +46,13 @@ export const VALIDATION = Object.freeze({
   USERNAME_MAX: 50,
 });
 
-// UI Constants
+// UI Constants - Using custom CSS variables for consistency
 export const UI = Object.freeze({
-  SPINNER_CLASS: 'animate-spin rounded-full h-12 w-12 border-4 border-blue-500 border-t-transparent',
-  MINI_SPINNER_CLASS: 'animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500',
+  SPINNER_CLASS: 'animate-spin rounded-full h-12 w-12 border-4 border-primary border-t-transparent',
+  MINI_SPINNER_CLASS: 'animate-spin rounded-full h-8 w-8 border-b-2 border-primary',
   VIEWPORT_HEIGHT: 'calc(100vh-4rem)',
-  BUTTON_PRIMARY: 'px-6 py-3 bg-indigo-600 text-white rounded-md hover:bg-indigo-500',
-  BUTTON_DANGER: 'p-2 text-red-400 hover:text-red-500 transition-colors',
+  BUTTON_PRIMARY: 'px-6 py-3 bg-primary text-white rounded-md hover:bg-primary-hover transition-colors',
+  BUTTON_DANGER: 'p-2 text-destructive hover:opacity-80 transition-opacity',
 });
 
 // Default export for backward compatibility

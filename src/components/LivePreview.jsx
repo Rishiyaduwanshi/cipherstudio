@@ -138,7 +138,7 @@ export default function LivePreview({ files = {} }) {
   if (hasCommonJS) {
     return (
       <div className="h-full w-full flex flex-col items-center justify-center p-6 text-sm">
-        <div className="mb-3 text-red-500 font-semibold">Preview unavailable — project uses CommonJS (require/module.exports)</div>
+        <div className="mb-3 text-destructive font-semibold">Preview unavailable — project uses CommonJS (require/module.exports)</div>
         <div className="mb-2 text-xs text-neutral-300">Files that use CommonJS detected:</div>
         <ul className="mb-3 text-xs list-disc list-inside text-neutral-200">
           {commonJsFiles.map((f) => (

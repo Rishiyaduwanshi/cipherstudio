@@ -124,7 +124,7 @@ export default function TreeFileExplorer({ files, onAddFile, onDeleteFile, onAdd
             className={`
               flex items-center py-1 px-2 text-sm cursor-pointer select-none group
               ${isActive 
-                ? 'bg-blue-600 text-white' 
+                ? 'bg-primary text-white' 
                 : 'text-gray-300 hover:bg-gray-700'
               }
             `}
@@ -144,7 +144,7 @@ export default function TreeFileExplorer({ files, onAddFile, onDeleteFile, onAdd
                   e.stopPropagation();
                   handleDeleteFile(node.path);
                 }}
-                className="opacity-0 group-hover:opacity-100 p-1 text-red-400 hover:text-red-300 rounded transition-opacity"
+                className="opacity-0 group-hover:opacity-100 p-1 text-destructive hover:opacity-80 rounded transition-opacity"
                 title={`Delete ${node.name}`}
               >
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
@@ -374,7 +374,7 @@ export default function TreeFileExplorer({ files, onAddFile, onDeleteFile, onAdd
           </button>
           <button
             onClick={() => handleDeleteFile(contextMenu.filePath)}
-            className="block w-full text-left px-3 py-1 text-sm text-red-400 hover:bg-gray-600"
+            className="block w-full text-left px-3 py-1 text-sm text-destructive hover:bg-gray-600"
           >
             🗑️ Delete
           </button>

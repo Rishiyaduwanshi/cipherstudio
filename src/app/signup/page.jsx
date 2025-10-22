@@ -37,7 +37,7 @@ export default function SignUpPage() {
   <label htmlFor="password" className="block text-sm mb-2">Password</label>
   <input id="password" name="password" type="password" required autoComplete="new-password" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full mb-4 p-2 rounded bg-slate-700" />
         <div className="flex items-center justify-between">
-          <button type="submit" className="px-4 py-2 bg-indigo-600 rounded text-white" disabled={loading}>{loading ? 'Signing up...' : 'Sign up'}</button>
+          <button type="submit" className="px-4 py-2 bg-primary rounded text-white hover:bg-primary-hover transition-colors disabled:opacity-60" disabled={loading}>{loading ? 'Signing up...' : 'Sign up'}</button>
         </div>
       </form>
     </div>

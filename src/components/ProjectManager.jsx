@@ -131,7 +131,7 @@ export default function ProjectManager({ project, setProject }) {
         <div className="flex items-center space-x-2">
           <button
             onClick={() => setShowProjectModal(true)}
-            className="px-3 py-1 bg-green-600 text-white rounded text-sm hover:bg-green-700"
+            className="btn-success"
           >
             New Project
           </button>
@@ -139,20 +139,20 @@ export default function ProjectManager({ project, setProject }) {
             <>
               <button
                 onClick={saveProjectAs}
-                className="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700"
+                className="px-3 py-1 bg-info text-white rounded text-sm hover:bg-info-hover transition-colors"
               >
                 Save to Local
               </button>
               <button
                 onClick={saveProjectToServer}
                 disabled={saving}
-                className="px-3 py-1 bg-indigo-600 text-white rounded text-sm hover:bg-indigo-700 disabled:opacity-60"
+                className="px-3 py-1 bg-primary text-white rounded text-sm hover:bg-primary-hover disabled:opacity-60 transition-colors"
               >
                 {saving ? 'Saving...' : 'Save to Server'}
               </button>
               <button
                 onClick={loadSavedProjects}
-                className="px-3 py-1 bg-purple-600 text-white rounded text-sm hover:bg-purple-700"
+                className="px-3 py-1 bg-warning text-white rounded text-sm hover:bg-warning-hover transition-colors"
               >
                 Load Project
               </button>
@@ -184,7 +184,7 @@ export default function ProjectManager({ project, setProject }) {
                   </span>
                   <span
                     className={`text-xs px-2 py-1 rounded ${
-                      proj.source === 'server' ? 'bg-blue-600' : 'bg-gray-600'
+                      proj.source === 'server' ? 'bg-primary' : 'bg-gray-600'
                     }`}
                   >
                     {proj.source === 'server' ? 'Server' : 'Local'}
@@ -243,7 +243,7 @@ export default function ProjectManager({ project, setProject }) {
                     </div>
                     <div
                       className={`text-xs px-2 py-1 rounded ${
-                        proj.source === 'server' ? 'bg-blue-600' : 'bg-gray-600'
+                        proj.source === 'server' ? 'bg-primary' : 'bg-gray-600'
                       }`}
                     >
                       {proj.source === 'server' ? 'Server' : 'Local'}

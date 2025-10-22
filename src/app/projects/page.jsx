@@ -51,7 +51,7 @@ export default function ProjectsPage() {
         <h1 className="text-3xl font-bold">My Projects</h1>
         <button
           onClick={() => setShowCreateModal(true)}
-          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-hover transition-colors"
         >
           <FiPlus /> New Project
         </button>
@@ -74,7 +74,7 @@ export default function ProjectsPage() {
                   </div>
                   <div className="flex items-center gap-2">
                     {project.visibility === 'public' ? (
-                      <FiGlobe className="text-blue-400" title="Public" />
+                      <FiGlobe className="text-info" title="Public" />
                     ) : (
                       <FiLock className="text-gray-400" title="Private" />
                     )}
@@ -88,7 +88,7 @@ export default function ProjectsPage() {
                 <div className="flex justify-between items-center">
                   <button
                     onClick={() => openInIDE(project._id)}
-                    className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+                    className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded hover:bg-primary-hover transition-colors"
                   >
                     <FiEdit3 /> Open in IDE
                   </button>
@@ -109,7 +109,7 @@ export default function ProjectsPage() {
               <p className="text-gray-400 text-lg mb-4">No projects yet</p>
               <button
                 onClick={() => setShowCreateModal(true)}
-                className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-hover transition-colors"
               >
                 <FiPlus /> Create your first project
               </button>

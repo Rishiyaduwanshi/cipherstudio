@@ -112,7 +112,7 @@ export default function EditorPage({ params }) {
 
   if (error) {
     return (
-      <div className="flex flex-col items-center justify-center h-[calc(100vh-4rem)] text-red-500">
+      <div className="flex flex-col items-center justify-center h-[calc(100vh-4rem)] text-destructive">
         <div className="mb-4">{error}</div>
         {errorDetails && (
           <pre className="bg-gray-800 text-left p-4 rounded text-xs max-w-3xl overflow-auto text-gray-200">
@@ -132,13 +132,13 @@ export default function EditorPage({ params }) {
                 setErrorDetails(null);
                 setUnauthenticated(false);
               }}
-              className="px-3 py-1 rounded bg-blue-600 text-white text-sm"
+              className="px-3 py-1 rounded bg-primary text-white text-sm hover:bg-primary-hover transition-colors"
             >
               Open demo without login
             </button>
             <button
               onClick={() => router.push(ROUTES.HOME)}
-              className="px-3 py-1 rounded border text-sm"
+              className="px-3 py-1 rounded border text-sm hover:bg-secondary transition-colors"
             >
               Go to home / sign in
             </button>
