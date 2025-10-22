@@ -1,6 +1,8 @@
 'use client';
 import { useState } from 'react';
 import { useFileTree } from '../hooks/useFileTree';
+import { getFileIcon } from '@/utils/fileHelpers';
+import { isFolder } from '@/utils/pathHelpers';
 
 export default function TreeFileExplorer({ files, onAddFile, onDeleteFile, onAddFolder, onOpenFile, activeFile, collapsed = false, onToggleCollapse, onRenameFile }) {
   const { tree, toggleFolder, getChildren } = useFileTree(files);
@@ -49,10 +51,9 @@ export default function TreeFileExplorer({ files, onAddFile, onDeleteFile, onAdd
 
   const handleDeleteFile = (filePath) => {
     if (!filePath) return;
-    // Ask for confirmation before deleting. If cancelled, just close the context menu.
-    const isFolder = !/\.[\w\d]+$/.test(filePath);
+    const isFolderPath = isFolder(filePath);
     const name = (filePath || '').split('/').pop() || filePath;
-    const confirmMsg = isFolder
+    const confirmMsg = isFolderPath
       ? `Delete folder "${filePath}" and all its contents? This cannot be undone.`
       : `Delete file "${name}"? This cannot be undone.`;
     if (!window.confirm(confirmMsg)) {
@@ -107,21 +108,6 @@ export default function TreeFileExplorer({ files, onAddFile, onDeleteFile, onAdd
     } else if (e.key === 'Escape') {
       setRenameValue('');
       setShowRenameInput(null);
-    }
-  };
-
-  const getFileIcon = (fileName) => {
-    const ext = fileName.split('.').pop()?.toLowerCase();
-    switch (ext) {
-      case 'js': return '📄';
-      case 'jsx': return '⚛️';
-      case 'ts': case 'tsx': return '🟦';
-      case 'css': return '🎨';
-      case 'html': return '🌐';
-      case 'json': return '📋';
-      case 'md': return '📝';
-      case 'png': case 'jpg': case 'jpeg': case 'gif': case 'svg': return '🖼️';
-      default: return '📄';
     }
   };
 

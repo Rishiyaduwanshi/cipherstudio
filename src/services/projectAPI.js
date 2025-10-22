@@ -1,14 +1,15 @@
 import axios from 'axios';
+import { API_CONFIG } from '@/constants';
 
-// Use env variable when available, otherwise fall back to localhost.
-// If the provided base URL doesn't include the API mount (/api/v#), append the default /api/v1
-const RAW_API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000';
+
+
+const RAW_API_BASE = API_CONFIG.BASE_URL;
 function normalizeApiRoot(raw) {
-  if (!raw) return 'http://localhost:5000/api/v1';
+  if (!raw) return `${API_CONFIG.BASE_URL}/api/${API_CONFIG.API_VERSION}`;
   let r = String(raw).trim().replace(/\/+$/, '');
-  // If a path like /api/v1 or /api/v2 is already present, keep it. Otherwise append /api/v1
+  
   if (!/\/api\/v\d+/i.test(r)) {
-    r = `${r}/api/v1`;
+    r = `${r}/api/${API_CONFIG.API_VERSION}`;
   }
   return r;
 }
@@ -16,13 +17,11 @@ function normalizeApiRoot(raw) {
 const API_ROOT = normalizeApiRoot(RAW_API_BASE);
 const PROJECTS_URL = `${API_ROOT}/projects`;
 
-/**
- * Return list of projects (array) — resolves to data.projects
- */
+
 export const getProjects = async (params = {}) => {
   try {
     const response = await axios.get(PROJECTS_URL, { withCredentials: true, params });
-    // server response shape: { message, statusCode, success, data: { projects } }
+    
     if (!response.data.success) {
       throw new Error(response.data.message);
     }
@@ -40,14 +39,14 @@ export const getProject = async (projectId) => {
     const url = `${PROJECTS_URL}/${projectId}`;
     console.info('Requesting project:', url);
     const response = await axios.get(url, { withCredentials: true });
-    return response.data.data.project; // single project object
+    return response.data.data.project; 
   } catch (error) {
     console.error('Error fetching project from', `${PROJECTS_URL}/${projectId}`, {
       status: error?.response?.status,
       data: error?.response?.data,
       message: error?.message,
     });
-    // Fallback: try relative path if server is proxied or same-origin
+    
     try {
       const relUrl = `/api/v1/projects/${projectId}`;
       console.info('Attempting fallback request to', relUrl);
@@ -73,7 +72,7 @@ export const getProject = async (projectId) => {
         ],
       };
 
-      // Prefer structured server responses when available
+      
       throw remoteData || relData || fallbackMessage;
     }
   }
@@ -117,9 +116,7 @@ export const deleteProject = async (projectId) => {
   }
 };
 
-/**
- * Convenience alias the UI expects: saveProject will create or update depending on presence of id/_id
- */
+
 export const saveProject = async (projectPayload) => {
   const id = projectPayload._id || projectPayload.id;
   if (id) {

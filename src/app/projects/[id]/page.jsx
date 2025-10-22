@@ -5,6 +5,9 @@ import IDE from '@/components/IDE';
 import ProjectManager from '@/components/ProjectManager';
 import useProjectStore from '@/stores/projectStore';
 import { initialFiles as demoInitialFiles } from '@/data/initialProject-react';
+import { getTempFiles } from '@/utils/storage';
+import { normalizeFiles } from '@/utils/fileHelpers';
+import { HTTP_STATUS, ROUTES } from '@/constants';
 
 export default function EditorPage({ params }) {
   const router = useRouter();
@@ -24,32 +27,6 @@ export default function EditorPage({ params }) {
       setLoading(true);
       try {
         const proj = await fetchProjectById(id);
-        const normalizeFiles = (files) => {
-          if (!files) return {};
-          if (Array.isArray(files)) {
-            return files.reduce((acc, item) => {
-              const path = item?.path || item?.filePath || item?.name || item?.filename || '/untitled';
-              const code = typeof item === 'string' ? item : (item?.code || item?.content || item?.value || '');
-              acc[path] = { code };
-              return acc;
-            }, {});
-          }
-
-          if (typeof files === 'object') {
-            const out = {};
-            Object.entries(files).forEach(([k, v]) => {
-              if (typeof v === 'string') out[k] = { code: v };
-              else if (v && typeof v === 'object') {
-                if ('code' in v) out[k] = v;
-                else if ('content' in v) out[k] = { code: v.content };
-                else out[k] = { code: JSON.stringify(v) };
-              } else out[k] = { code: '' };
-            });
-            return out;
-          }
-          return {};
-        };
-
         const normalized = { ...(proj || {}) };
         normalized.files = normalizeFiles(proj?.files);
         console.info('Loaded project; files normalized ->', Object.keys(normalized.files || {}).length, 'files');
@@ -58,9 +35,9 @@ export default function EditorPage({ params }) {
         console.error('Error fetching project:', err);
         setErrorDetails(err?.response?.data || err);
         if (
-          (err && err.statusCode === 401) ||
-          (err && err.status === 401) ||
-          err?.response?.status === 401
+          (err && err.statusCode === HTTP_STATUS.UNAUTHORIZED) ||
+          (err && err.status === HTTP_STATUS.UNAUTHORIZED) ||
+          err?.response?.status === HTTP_STATUS.UNAUTHORIZED
         ) {
           console.warn(
             'Project fetch returned 401 — unauthenticated. Showing sign-in/demo options.'
@@ -75,17 +52,14 @@ export default function EditorPage({ params }) {
             (err.message || err?.data?.message || 'Failed to load project')) ||
           'Failed to load project';
         if (
-          (err && (err.statusCode === 404 || err.status === 404)) ||
+          (err && (err.statusCode === HTTP_STATUS.NOT_FOUND || err.status === HTTP_STATUS.NOT_FOUND)) ||
           /route not found/i.test(String(msg))
         ) {
           
           try {
-            const temp =
-              typeof window !== 'undefined' &&
-              localStorage.getItem('cipherstudio-temp');
-            if (temp) {
-              const parsed = JSON.parse(temp);
-              setProject(parsed);
+            const tempFiles = getTempFiles();
+            if (tempFiles) {
+              setProject({ files: tempFiles });
               setError(
                 'Project not found on server — loaded local temp project'
               );
@@ -163,7 +137,7 @@ export default function EditorPage({ params }) {
               Open demo without login
             </button>
             <button
-              onClick={() => router.push('/')}
+              onClick={() => router.push(ROUTES.HOME)}
               className="px-3 py-1 rounded border text-sm"
             >
               Go to home / sign in

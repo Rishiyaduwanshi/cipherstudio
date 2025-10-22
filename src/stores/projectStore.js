@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { toast } from 'react-toastify';
 import * as projectAPI from '../services/projectAPI';
+import { HTTP_STATUS, ROUTES } from '@/constants';
 
 const useProjectStore = create((set) => ({
   projects: [],
@@ -15,8 +16,8 @@ const useProjectStore = create((set) => ({
       return projects;
     } catch (error) {
       set({ loading: false });
-      if (error.status === 401) {
-        window.location.href = '/signin';
+      if (error.status === HTTP_STATUS.UNAUTHORIZED) {
+        window.location.href = ROUTES.SIGNIN;
         return;
       }
       toast.error(error.message || 'Failed to load projects');
@@ -35,8 +36,8 @@ const useProjectStore = create((set) => ({
       return created;
     } catch (error) {
       set({ loading: false });
-      if (error.status === 401) {
-        window.location.href = '/signin';
+      if (error.status === HTTP_STATUS.UNAUTHORIZED) {
+        window.location.href = ROUTES.SIGNIN;
         return;
       }
       throw error;
@@ -51,11 +52,11 @@ const useProjectStore = create((set) => ({
       return project;
     } catch (error) {
       set({ loading: false });
-      if (error.status === 401) {
-        window.location.href = '/signin';
+      if (error.status === HTTP_STATUS.UNAUTHORIZED) {
+        window.location.href = ROUTES.SIGNIN;
         return;
       }
-      if (error.status === 404) {
+      if (error.status === HTTP_STATUS.NOT_FOUND) {
         toast.error('Project not found');
         return null;
       }
@@ -75,8 +76,8 @@ const useProjectStore = create((set) => ({
       return updated;
     } catch (error) {
       set({ loading: false });
-      if (error.status === 401) {
-        window.location.href = '/signin';
+      if (error.status === HTTP_STATUS.UNAUTHORIZED) {
+        window.location.href = ROUTES.SIGNIN;
         return;
       }
       throw error;
@@ -94,8 +95,8 @@ const useProjectStore = create((set) => ({
       }));
     } catch (error) {
       set({ loading: false });
-      if (error.status === 401) {
-        window.location.href = '/signin';
+      if (error.status === HTTP_STATUS.UNAUTHORIZED) {
+        window.location.href = ROUTES.SIGNIN;
         return;
       }
       throw error;

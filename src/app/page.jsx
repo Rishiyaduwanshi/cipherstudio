@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import useAuthStore from '@/stores/authStore';
+import { ROUTES, APP_CONFIG, UI } from '@/constants';
 
 export default function Home() {
   const router = useRouter();
@@ -15,19 +16,19 @@ export default function Home() {
 
   const handleGetStarted = () => {
     if (isAuthenticated()) {
-      router.push('/projects');
+      router.push(ROUTES.PROJECTS);
     } else {
-      router.push('/signin');
+      router.push(ROUTES.SIGNIN);
     }
   };
 
   return (
     <div className="min-h-screen bg-slate-900 text-white flex flex-col items-center justify-center">
-      <h1 className="text-4xl font-bold mb-4">Welcome to CipherStudio</h1>
+      <h1 className="text-4xl font-bold mb-4">Welcome to {APP_CONFIG.APP_NAME}</h1>
       <p className="text-lg mb-8">Build and manage your React projects with ease.</p>
       <button
         onClick={handleGetStarted}
-        className="px-6 py-3 bg-indigo-600 text-white rounded-md hover:bg-indigo-500"
+        className={UI.BUTTON_PRIMARY}
       >
         Get Started
       </button>

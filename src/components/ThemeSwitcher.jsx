@@ -1,5 +1,6 @@
 "use client"
 import React, { useState, useEffect } from "react";
+import { getTheme, setTheme } from '@/utils/storage';
 
 export default function ThemeSwitcher() {
   const [isDark, setIsDark] = useState(true);
@@ -7,20 +8,15 @@ export default function ThemeSwitcher() {
   // Apply persisted theme and ensure DOM updates only run on the client
   useEffect(() => {
     try {
-      const savedTheme = localStorage.getItem('cipherstudio-theme');
-      if (savedTheme) {
-        const dark = savedTheme === 'dark';
-        setIsDark(dark);
-        // The CSS file defines a `.light` class to enable the light theme.
-        // Default is the dark theme (variables in :root). So add/remove that class accordingly.
-        if (dark) {
-          document.documentElement.classList.remove('light');
-        } else {
-          document.documentElement.classList.add('light');
-        }
-      } else {
-        // If no preference saved, default to dark mode and ensure light class is not present
+      const savedTheme = getTheme();
+      const dark = savedTheme === 'dark';
+      setIsDark(dark);
+      // The CSS file defines a `.light` class to enable the light theme.
+      // Default is the dark theme (variables in :root). So add/remove that class accordingly.
+      if (dark) {
         document.documentElement.classList.remove('light');
+      } else {
+        document.documentElement.classList.add('light');
       }
     } catch (e) {
       // localStorage might be unavailable in some environments — ignore errors
@@ -31,11 +27,7 @@ export default function ThemeSwitcher() {
   const toggleTheme = () => {
     const newTheme = !isDark;
     setIsDark(newTheme);
-    try {
-      localStorage.setItem('cipherstudio-theme', newTheme ? 'dark' : 'light');
-    } catch (e) {
-      // ignore storage errors
-    }
+    setTheme(newTheme ? 'dark' : 'light');
 
     // Toggle the `.light` class — dark is the default/base theme
     if (newTheme) {

@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
 import useAuthStore from '@/stores/authStore';
+import { ROUTES } from '@/constants';
 
 export default function SignUpPage() {
   const router = useRouter();
@@ -19,7 +20,7 @@ export default function SignUpPage() {
     setLoading(false);
     if (res && res.success) {
       toast.success('Account created');
-      router.push('/projects');
+      router.push(ROUTES.PROJECTS);
     } else {
       toast.error(res.error || 'Registration failed');
     }

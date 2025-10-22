@@ -2,6 +2,7 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import useAuthStore from '@/stores/authStore';
+import { ROUTES } from '@/constants';
 
 export default function Header() {
   const router = useRouter();
@@ -11,7 +12,7 @@ export default function Header() {
 
   const handleLogout = async () => {
     await logout();
-    router.push('/signin');
+    router.push(ROUTES.SIGNIN);
   };
 
   return (

@@ -1,11 +1,12 @@
 'use client';
 import { useState, useEffect, useRef } from 'react';
-import projectAPI from '@/services/projectAPI';
-import useAuthStore from '@/stores/authStore';
 import { toast } from 'react-toastify';
 import TreeFileExplorer from './TreeFileExplorer';
 import CodeEditor from './CodeEditor';
 import LivePreview from './LivePreview';
+import { saveTempFiles } from '@/utils/storage';
+import { getLanguage } from '@/utils/fileHelpers';
+import { isFolder, joinPath, getChildFiles, renamePath } from '@/utils/pathHelpers';
 
 export default function IDE({
   initialFiles = {},
@@ -36,7 +37,6 @@ export default function IDE({
   const [collapsed, setCollapsed] = useState(false);
   const lastProjectIdRef = useRef(null);
 
-  // keep active file valid if files change externally
   useEffect(() => {
     const keys = Object.keys(files || {});
     if (!activeFile && keys.length) setActiveFile(keys[0]);
@@ -83,10 +83,8 @@ export default function IDE({
       [activeFile]: { ...files[activeFile], code: newCode },
     };
     
-    // Update files state
     setFiles(updatedFiles);
     
-    // Update project files if available
     if (project && setProject) {
       setProject(prevProject => ({
         ...prevProject,
@@ -94,12 +92,8 @@ export default function IDE({
       }));
     }
     
-    // Save to localStorage
-    try {
-      localStorage.setItem('cipherstudio-temp', JSON.stringify({ files: updatedFiles }));
-    } catch (e) {}
+    saveTempFiles(updatedFiles);
     
-    // Mark file as dirty
     setDirtyFiles((prev) => ({ ...prev, [activeFile]: true }));
   };
 
@@ -110,14 +104,10 @@ export default function IDE({
 
 
 
-  // File operations: add, delete, create folder, rename
   const handleAddFile = (filePath, content = '') => {
     setFiles((prev) => {
       const updated = { ...prev, [filePath]: { code: content } };
-      // Save to localStorage
-      try {
-        localStorage.setItem('cipherstudio-temp', JSON.stringify({ files: updated }));
-      } catch (e) {}
+      saveTempFiles(updated);
       return updated;
     });
     setActiveFile(filePath);
@@ -136,24 +126,22 @@ export default function IDE({
   const handleDeleteFile = (filePath) => {
     setFiles((prev) => {
       const copy = { ...prev };
-      const isFolder = !/\.[\w\d]+$/.test(filePath);
-      if (isFolder) {
-        const prefix = filePath.endsWith('/') ? filePath : `${filePath}/`;
-        Object.keys(copy).forEach((k) => {
-          if (k === filePath || k.startsWith(prefix)) delete copy[k];
-        });
+      const isFolderPath = isFolder(filePath);
+      
+      if (isFolderPath) {
+        getChildFiles(copy, filePath).forEach((k) => delete copy[k]);
       } else {
         delete copy[filePath];
       }
-      // Save to localStorage
-      try {
-        localStorage.setItem('cipherstudio-temp', JSON.stringify({ files: copy }));
-      } catch (e) {}
+      
+      saveTempFiles(copy);
       return copy;
     });
+    
     setOpenTabs((prev) =>
       prev.filter((t) => !(t === filePath || t.startsWith(`${filePath}/`)))
     );
+    
     setDirtyFiles((prev) => {
       const p = { ...prev };
       delete p[filePath];
@@ -162,6 +150,7 @@ export default function IDE({
       });
       return p;
     });
+    
     setFiles((prev) => {
       if (activeFile === filePath || activeFile?.startsWith(`${filePath}/`)) {
         const remaining = Object.keys(prev).filter(
@@ -171,16 +160,15 @@ export default function IDE({
       }
       return prev;
     });
+    
     if (project && setProject) {
       setProject((prev) => {
         if (!prev) return prev;
         const copy = { ...(prev.files || {}) };
-        const isFolder = !/\.[\w\d]+$/.test(filePath);
-        if (isFolder) {
-          const prefix = filePath.endsWith('/') ? filePath : `${filePath}/`;
-          Object.keys(copy).forEach((k) => {
-            if (k === filePath || k.startsWith(prefix)) delete copy[k];
-          });
+        const isFolderPath = isFolder(filePath);
+        
+        if (isFolderPath) {
+          getChildFiles(copy, filePath).forEach((k) => delete copy[k]);
         } else {
           delete copy[filePath];
         }
@@ -190,49 +178,37 @@ export default function IDE({
   };
 
   const handleAddFolder = (folderName, parentPath = '/') => {
-    const cleanParent = parentPath === '/' ? '' : parentPath;
-    const folderPath = `${cleanParent}/${folderName}`.replace(/\/+/g, '/');
-    const indexFile = `${folderPath}/index.js`.replace(/\/+/g, '/');
+    const indexFile = joinPath(parentPath === '/' ? '' : parentPath, folderName, 'index.js');
     handleAddFile(indexFile, '// Folder created\n');
   };
 
   const handleRenameFile = (oldPath, newName) => {
     if (!oldPath || !newName) return;
-    const isFolder = !/\.[\w\d]+$/.test(oldPath);
-    // compute parent path
-    const lastSlash = oldPath.lastIndexOf('/');
-    const parent = lastSlash === 0 ? '/' : oldPath.slice(0, lastSlash);
-    const newBase = `${parent === '/' ? '' : parent}/${newName}`.replace(
-      /\/+/g,
-      '/'
-    );
+    const isFolderPath = isFolder(oldPath);
+    const newBase = renamePath(oldPath, newName);
 
     // check collisions
-    if (isFolder) {
+    if (isFolderPath) {
       const collides = Object.keys(files || {}).some(
         (k) => k === newBase || k.startsWith(`${newBase}/`)
       );
-      if (collides) {
-        // Show error in UI, not toast
-        return;
-      }
+      if (collides) return;
+      
       setFiles((prev) => {
         const copy = { ...prev };
         const prefix = oldPath.endsWith('/') ? oldPath : `${oldPath}/`;
         Object.keys(prev).forEach((k) => {
           if (k === oldPath || k.startsWith(prefix)) {
             const rest = k.slice(prefix.length);
-            const newKey = `${newBase}/${rest}`.replace(/\/+/g, '/');
+            const newKey = joinPath(newBase, rest);
             copy[newKey] = copy[k];
             delete copy[k];
           }
         });
-        // Save to localStorage
-        try {
-          localStorage.setItem('cipherstudio-temp', JSON.stringify({ files: copy }));
-        } catch (e) {}
+        saveTempFiles(copy);
         return copy;
       });
+      
       setOpenTabs((prev) =>
         prev.map((t) =>
           t === oldPath || t.startsWith(`${oldPath}/`)
@@ -245,6 +221,7 @@ export default function IDE({
           ? prev.replace(oldPath, newBase)
           : prev
       );
+      
       if (project && setProject) {
         setProject((prev) => {
           if (!prev) return prev;
@@ -253,7 +230,7 @@ export default function IDE({
           Object.keys(prev.files || {}).forEach((k) => {
             if (k === oldPath || k.startsWith(prefix)) {
               const rest = k.slice(prefix.length);
-              const newKey = `${newBase}/${rest}`.replace(/\/+/g, '/');
+              const newKey = joinPath(newBase, rest);
               copy[newKey] = copy[k];
               delete copy[k];
             }
@@ -261,39 +238,30 @@ export default function IDE({
           return { ...prev, files: copy };
         });
       }
-  // Optionally show success in UI, not toast
     } else {
-      const newPath = `${parent === '/' ? '' : parent}/${newName}`.replace(
-        /\/+/g,
-        '/'
-      );
-      if (newPath === oldPath) return;
-      if (files[newPath]) {
-        // Show error in UI, not toast
-        return;
-      }
+      if (newBase === oldPath) return;
+      if (files[newBase]) return;
+      
       setFiles((prev) => {
         const copy = { ...prev };
-        copy[newPath] = copy[oldPath];
+        copy[newBase] = copy[oldPath];
         delete copy[oldPath];
-        // Save to localStorage
-        try {
-          localStorage.setItem('cipherstudio-temp', JSON.stringify({ files: copy }));
-        } catch (e) {}
+        saveTempFiles(copy);
         return copy;
       });
-      setOpenTabs((prev) => prev.map((t) => (t === oldPath ? newPath : t)));
-      setActiveFile((prev) => (prev === oldPath ? newPath : prev));
+      
+      setOpenTabs((prev) => prev.map((t) => (t === oldPath ? newBase : t)));
+      setActiveFile((prev) => (prev === oldPath ? newBase : prev));
+      
       if (project && setProject) {
         setProject((prev) => {
           if (!prev) return prev;
           const copy = { ...(prev.files || {}) };
-          copy[newPath] = copy[oldPath];
+          copy[newBase] = copy[oldPath];
           delete copy[oldPath];
           return { ...prev, files: copy };
         });
       }
-  // Optionally show success in UI, not toast
     }
   };
 
@@ -305,10 +273,8 @@ export default function IDE({
         ...prev,
         [activeFile]: { ...prev[activeFile], code: val },
       }));
-      // mark as saved
       setDirtyFiles((prev) => ({ ...prev, [activeFile]: false }));
-  // Optionally show success in UI, not toast
-      // If project context exists, update parent's project files and optionally autosave to server
+      
       if (project && setProject) {
         const updated = {
           ...(project || {}),
@@ -322,8 +288,6 @@ export default function IDE({
     }
   };
 
-  const auth = useAuthStore();
- 
   useEffect(() => {
     function onKey(e) {
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
@@ -340,43 +304,19 @@ export default function IDE({
     const t = setInterval(() => {
       const dirty = Object.keys(dirtyFiles || {}).filter((k) => dirtyFiles[k]);
       if (dirty.length === 0) return;
+      
       if (project && setProject) {
         setProject((prev) => ({
           ...(prev || {}),
           files: { ...(prev?.files || {}), ...files },
         }));
       } else {
-        localStorage.setItem('cipherstudio-temp', JSON.stringify({ files }));
+        saveTempFiles(files);
       }
-      // clear dirty flags after local save
       setDirtyFiles({});
-  // Optionally show autosave in UI, not toast
     }, 5000);
     return () => clearInterval(t);
   }, [autoSave, dirtyFiles, files, project, setProject]);
-
-  // Determine language for editor based on file extension
-  const getLanguage = (filePath) => {
-    const ext = filePath?.split('.').pop();
-    switch (ext) {
-      case 'js':
-        return 'javascript';
-      case 'jsx':
-        return 'javascript';
-      case 'ts':
-        return 'typescript';
-      case 'tsx':
-        return 'typescript';
-      case 'css':
-        return 'css';
-      case 'html':
-        return 'html';
-      case 'json':
-        return 'json';
-      default:
-        return 'javascript';
-    }
-  };
 
   return (
     <div className="relative flex h-full w-full min-h-0">

@@ -6,6 +6,8 @@ import projectAPI from '@/services/projectAPI';
 import { useRouter } from 'next/navigation';
 import CreateProjectModal from './CreateProjectModal';
 import DownloadButton from './DownloadButton';
+import { getLocalProjects, saveLocalProject, getStorageItem, setStorageItem } from '@/utils/storage';
+import { HTTP_STATUS, ROUTES, UI } from '@/constants';
 
 export default function ProjectManager({ project, setProject }) {
   const [showProjectModal, setShowProjectModal] = useState(false);
@@ -26,8 +28,8 @@ export default function ProjectManager({ project, setProject }) {
         serverProjects = Array.isArray(resp) ? resp : resp.projects || resp;
       } catch (e) {
         console.warn('Failed to fetch server projects', e);
-        if (e?.response?.status === 401) {
-          router.push('/signin');
+        if (e?.response?.status === HTTP_STATUS.UNAUTHORIZED) {
+          router.push(ROUTES.SIGNIN);
           return;
         }
         toast.error('Failed to fetch server projects');
@@ -42,26 +44,7 @@ export default function ProjectManager({ project, setProject }) {
         listId: `server-${p._id || p.id}`,
       }));
 
-      const localEntries = [];
-      for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-        if (key?.startsWith('cipherstudio-project')) {
-          try {
-            const proj = JSON.parse(localStorage.getItem(key));
-            localEntries.push({
-              source: 'local',
-              storageKey: key,
-              name: proj?.name || 'Local project',
-              files: proj?.files || {},
-              project: proj,
-              listId: `local-${key}`,
-            });
-          } catch (e) {
-            console.warn('Failed to parse local project', key, e);
-          }
-        }
-      }
-
+      const localEntries = getLocalProjects();
       setSavedProjects([...serverEntries, ...localEntries]);
     } catch (error) {
       console.error('❌ Load projects error:', error);
@@ -75,8 +58,7 @@ export default function ProjectManager({ project, setProject }) {
 
   const saveProjectAs = () => {
     try {
-      const projectId = `cipherstudio-project-${Date.now()}`;
-      localStorage.setItem(projectId, JSON.stringify(project));
+      saveLocalProject(project);
       toast.success(`Project "${project?.name || 'Untitled'}" saved locally`);
     } catch (e) {
       console.error('Save local project failed', e);
@@ -108,12 +90,12 @@ export default function ProjectManager({ project, setProject }) {
       toast.success('Project saved to server');
 
       if (!project._id && savedProject._id) {
-        router.push(`/projects/${savedProject._id}`);
+        router.push(ROUTES.PROJECT_DETAIL(savedProject._id));
       }
     } catch (e) {
       console.error('Save to server failed', e);
-      if (e?.response?.status === 401) {
-        router.push('/signin');
+      if (e?.response?.status === HTTP_STATUS.UNAUTHORIZED) {
+        router.push(ROUTES.SIGNIN);
         return;
       }
       toast.error(
@@ -126,13 +108,10 @@ export default function ProjectManager({ project, setProject }) {
 
   const loadLocalProject = (storageKey) => {
     try {
-      const savedProject = JSON.parse(localStorage.getItem(storageKey));
+      const savedProject = getStorageItem(storageKey);
       if (savedProject) {
         setProject(savedProject);
-        localStorage.setItem(
-          'cipherstudio-project',
-          JSON.stringify(savedProject)
-        );
+        setStorageItem('cipherstudio-project', savedProject);
         toast.success(
           `Loaded local project: ${savedProject?.name || 'Untitled'}`
         );
@@ -235,7 +214,7 @@ export default function ProjectManager({ project, setProject }) {
             <h3 className="text-white text-lg mb-4">Load Saved Project</h3>
             {loading ? (
               <div className="flex justify-center py-8">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+                <div className={UI.MINI_SPINNER_CLASS}></div>
               </div>
             ) : savedProjects.length === 0 ? (
               <p className="text-gray-400 text-center py-4">
@@ -248,7 +227,7 @@ export default function ProjectManager({ project, setProject }) {
                     key={proj.listId}
                     onClick={() => {
                       if (proj.source === 'server') {
-                        router.push(`/projects/${proj.id}`);
+                        router.push(ROUTES.PROJECT_DETAIL(proj.id));
                         setShowLoadModal(false);
                       } else {
                         loadLocalProject(proj.storageKey);

@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
 import useAuthStore from '@/stores/authStore';
+import { ROUTES } from '@/constants';
 
 export default function SignInPage() {
   const router = useRouter();
@@ -24,7 +25,7 @@ export default function SignInPage() {
     setLoading(false);
     if (res && res.success) {
       toast.success('Signed in');
-      router.push('/projects');
+      router.push(ROUTES.PROJECTS);
     } else {
       // Show server message if available, and log detailed payload for debugging
       console.error('Sign-in failed response:', res?.details || res);

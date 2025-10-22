@@ -6,6 +6,7 @@ import useProjectStore from '@/stores/projectStore';
 import { toast } from 'react-toastify';
 import { FiTrash2, FiEdit3, FiPlus, FiGlobe, FiLock } from 'react-icons/fi';
 import CreateProjectModal from '@/components/CreateProjectModal';
+import { ROUTES, UI } from '@/constants';
 
 export default function ProjectsPage() {
   const router = useRouter();
@@ -15,7 +16,7 @@ export default function ProjectsPage() {
 
   useEffect(() => {
     if (!isAuthenticated()) {
-      router.push('/signin');
+      router.push(ROUTES.SIGNIN);
       return;
     }
     
@@ -38,7 +39,7 @@ export default function ProjectsPage() {
   };
 
   const openInIDE = (projectId) => {
-    router.push(`/projects/${projectId}`);
+    router.push(ROUTES.PROJECT_DETAIL(projectId));
   };
 
   if (!isAuthenticated()) return null;
@@ -59,7 +60,7 @@ export default function ProjectsPage() {
       {/* Projects Grid */}
       {loading ? (
         <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-500 border-t-transparent"></div>
+          <div className={UI.SPINNER_CLASS}></div>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -93,7 +94,7 @@ export default function ProjectsPage() {
                   </button>
                   <button
                     onClick={() => handleDeleteProject(project._id)}
-                    className="p-2 text-red-400 hover:text-red-500 transition-colors"
+                    className={UI.BUTTON_DANGER}
                     title="Delete project"
                   >
                     <FiTrash2 />

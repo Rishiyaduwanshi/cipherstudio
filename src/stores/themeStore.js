@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { getTheme, setTheme as saveTheme } from '@/utils/storage';
 
 const useThemeStore = create((set, get) => ({
   theme: 'dark',
@@ -6,7 +7,7 @@ const useThemeStore = create((set, get) => ({
 
   initializeTheme: () => {
     if (typeof window !== 'undefined') {
-      const savedTheme = localStorage.getItem('cipherstudio-theme') || 'dark';
+      const savedTheme = getTheme();
       // Use classList to only toggle the `light` class so we don't remove other classes
       if (savedTheme === 'light') {
         document.documentElement.classList.add('light');
@@ -22,7 +23,7 @@ const useThemeStore = create((set, get) => ({
     const newTheme = theme === 'dark' ? 'light' : 'dark';
     
     set({ theme: newTheme });
-    localStorage.setItem('cipherstudio-theme', newTheme);
+    saveTheme(newTheme);
     if (newTheme === 'light') {
       document.documentElement.classList.add('light');
     } else {
@@ -32,7 +33,7 @@ const useThemeStore = create((set, get) => ({
 
   setTheme: (newTheme) => {
     set({ theme: newTheme });
-    localStorage.setItem('cipherstudio-theme', newTheme);
+    saveTheme(newTheme);
     if (newTheme === 'light') {
       document.documentElement.classList.add('light');
     } else {
