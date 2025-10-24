@@ -4,10 +4,10 @@
 class TreeNode {
   constructor(name, type = 'file', path = '') {
     this.name = name;
-    this.type = type; // 'file' or 'folder'
+    this.type = type; 
     this.path = path;
-    this.children = new Map(); // Using Map for automatic sorting
-    this.isExpanded = true; // Default expanded state
+    this.children = new Map(); 
+    this.isExpanded = true; 
     this.content = '';
   }
 
@@ -54,13 +54,54 @@ export class FileTreeManager {
    * Build tree from files object
    */
   buildFromFiles(files) {
+    // Save expanded states before rebuilding
+    const expandedStates = new Map();
+    this.saveExpandedStates(this.root, expandedStates);
+    
     this.root = new TreeNode('root', 'folder', '/');
     
     Object.keys(files).forEach(filePath => {
       this.addFile(filePath, files[filePath]);
     });
 
+    // Restore expanded states after rebuilding
+    this.restoreExpandedStates(this.root, expandedStates);
+
     return this.root;
+  }
+
+  /**
+   * Save expanded states recursively
+   */
+  saveExpandedStates(node, statesMap) {
+    if (!node) return;
+    
+    if (node.type === 'folder' && node.path) {
+      statesMap.set(node.path, node.isExpanded);
+    }
+    
+    if (node.children) {
+      for (const child of node.children.values()) {
+        this.saveExpandedStates(child, statesMap);
+      }
+    }
+  }
+
+  /**
+   * Restore expanded states recursively
+   */
+  restoreExpandedStates(node, statesMap) {
+    if (!node) return;
+    
+    if (node.type === 'folder' && node.path && statesMap.has(node.path)) {
+      node.isExpanded = statesMap.get(node.path);
+    }
+    
+    if (node.children) {
+      for (const child of node.children.values()) {
+        this.restoreExpandedStates(child, statesMap);
+      }
+    }
   }
 
   /**

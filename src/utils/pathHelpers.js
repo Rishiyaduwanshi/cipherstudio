@@ -87,5 +87,9 @@ export function getChildFiles(files, folderPath) {
  */
 export function renamePath(oldPath, newName) {
 	const parent = getParentPath(oldPath);
-	return joinPath(parent === '/' ? '' : parent, newName);
+	if (parent === '/') {
+		// For root level files/folders, ensure leading slash
+		return '/' + newName;
+	}
+	return joinPath(parent, newName);
 }
