@@ -40,6 +40,14 @@ export default function Home() {
           >
             Get Started →
           </button>
+          <div className="flex items-center justify-center gap-4 mt-6">
+            <button
+              onClick={() => router.push(ROUTES.EXPLORE)}
+              className="text-blue-400 hover:text-blue-300 transition-colors underline"
+            >
+              Explore Public Projects
+            </button>
+          </div>
           <p className="text-gray-400 mt-4 text-sm">
             Login to use the full-featured IDE
           </p>

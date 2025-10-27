@@ -17,6 +17,21 @@ function normalizeApiRoot(raw) {
 const API_ROOT = normalizeApiRoot(RAW_API_BASE);
 const PROJECTS_URL = `${API_ROOT}/projects`;
 
+export const getPublicProjects = async () => {
+  try {
+    const response = await axios.get(`${PROJECTS_URL}/public`);
+    
+    if (!response.data.success) {
+      throw new Error(response.data.message);
+    }
+    return response.data.data.projects || [];
+  } catch (error) {
+    console.error('Error fetching public projects:', error);
+    const responseError = error.response?.data || { message: 'Failed to fetch public projects', status: error.response?.status };
+    responseError.status = error.response?.status;
+    throw responseError;
+  }
+};
 
 export const getProjects = async (params = {}) => {
   try {

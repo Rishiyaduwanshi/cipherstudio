@@ -31,6 +31,7 @@ export const ROUTES = Object.freeze({
   SIGNIN: '/signin',
   SIGNUP: '/signup',
   PROJECTS: '/projects',
+  EXPLORE: '/explore',
   PROJECT_DETAIL: (id) => `/projects/${id}`,
 });
 

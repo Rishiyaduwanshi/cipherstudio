@@ -2,6 +2,23 @@ import Project from '../models/project.model.js';
 import appResponse from '../utils/appResponse.js';
 import { AppError, NotFoundError } from '../utils/appError.js';
 
+export const getPublicProjects = async (req, res, next) => {
+  try {
+    const projects = await Project.find({ visibility: 'public' })
+      .populate('userId', 'name email')
+      .sort({ createdAt: -1 })
+      .limit(50);
+
+    appResponse(res, {
+      statusCode: 200,
+      message: 'Public projects fetched successfully',
+      data: { projects },
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
 export const getUserProjects = async (req, res, next) => {
   try {
     const userId = req.user._id;
@@ -19,11 +36,16 @@ export const getUserProjects = async (req, res, next) => {
 
 export const getProjectById = async (req, res, next) => {
   try {
-    const project = await Project.findById(req.params.id);
+    const project = await Project.findById(req.params.id).populate('userId', 'name email');
     if (!project) throw new NotFoundError('Project not found');
 
-      if (project.userId.toString() !== req.user._id.toString())
+    // Allow access if project is public OR user is the owner
+    const isPublic = project.visibility === 'public';
+    const isOwner = req.user && project.userId._id.toString() === req.user._id.toString();
+    
+    if (!isPublic && !isOwner) {
       throw new AppError({ statusCode: 403, message: 'Forbidden' });
+    }
 
     appResponse(res, {
       statusCode: 200,
@@ -37,9 +59,6 @@ export const getProjectById = async (req, res, next) => {
 
 export const createProject = async (req, res, next) => {
   try {
-    console.log("Headers:", req.headers);
-    console.log("Raw Body:", req.body);
-    console.log("Content-Type:", req.headers['content-type']);
     
     if (!req.body || Object.keys(req.body).length === 0) {
       throw new AppError({ 
@@ -70,8 +89,6 @@ export const createProject = async (req, res, next) => {
         autoSave: settings.autoSave ?? true
       }
     };
-
-    console.log("Creating project with data:", projectData);
 
     const project = await Project.create(projectData);
 

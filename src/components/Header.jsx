@@ -25,7 +25,10 @@ export default function Header() {
           CipherStudio
         </Link>
         <nav className="flex gap-3 text-sm ml-4">
-          <Link href="/projects" className="hidden md:inline">
+          <Link href="/explore" className="hover:text-blue-400 transition-colors">
+            Explore
+          </Link>
+          <Link href="/projects" className="hidden md:inline hover:text-blue-400 transition-colors">
             Projects
           </Link>
         </nav>

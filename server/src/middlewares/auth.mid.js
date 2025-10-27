@@ -18,3 +18,20 @@ export const authenticate = (req, res, next) => {
     next(new UnauthorizedError('Invalid or expired token'));
   }
 };
+
+// Optional authentication - doesn't throw error if no token
+export const optionalAuthenticate = (req, res, next) => {
+  try {
+    const token = req.cookies?.accessToken;
+
+    if (token) {
+      const decoded = jwt.verify(token, config.JWT_SECRET);
+      req.user = { _id: decoded._id };
+    }
+    
+    next();
+  } catch (error) {
+    // If token is invalid, just continue without user
+    next();
+  }
+};

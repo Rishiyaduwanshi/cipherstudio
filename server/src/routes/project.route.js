@@ -5,16 +5,20 @@ import {
   createProject,
   updateProject,
   deleteProject,
+  getPublicProjects,
 } from '../controllers/project.controller.js';
-import { authenticate } from '../middlewares/auth.mid.js';
+import { authenticate, optionalAuthenticate } from '../middlewares/auth.mid.js';
 
 const router = express.Router();
 
+// Public routes - no authentication required
+router.get('/public', getPublicProjects);
+router.get('/:id', optionalAuthenticate, getProjectById);
+
+// Protected routes
 router.use(authenticate);
 
 router.get('/', getUserProjects);
-
-router.get('/:id', getProjectById);
 
 router.post('/', createProject);
 
