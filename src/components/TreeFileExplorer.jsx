@@ -4,12 +4,10 @@ import { useFileTree } from '../hooks/useFileTree';
 import { getFileIcon } from '@/utils/fileHelpers';
 import { isFolder } from '@/utils/pathHelpers';
 
-export default function TreeFileExplorer({ files, onAddFile, onDeleteFile, onAddFolder, onOpenFile, activeFile, collapsed = false, onToggleCollapse, onRenameFile }) {
+export default function TreeFileExplorer({ files, onAddFile, onDeleteFile, onOpenFile, activeFile, collapsed = false, onToggleCollapse, onRenameFile }) {
   const { tree, toggleFolder, getChildren } = useFileTree(files);
   const [showNewFileInput, setShowNewFileInput] = useState(null); // folder path where to add file
-  const [showNewFolderInput, setShowNewFolderInput] = useState(null);
   const [newFileName, setNewFileName] = useState('');
-  const [newFolderName, setNewFolderName] = useState('');
   const [showRenameInput, setShowRenameInput] = useState(null);
   const [renameValue, setRenameValue] = useState('');
   const [contextMenu, setContextMenu] = useState(null);
@@ -42,13 +40,6 @@ export default function TreeFileExplorer({ files, onAddFile, onDeleteFile, onAdd
     closeContextMenu();
   };
 
-  // Show the new folder input for a parent folder
-  const handleAddNewFolder = (parentPath = '/') => {
-    setShowNewFolderInput(parentPath || '/');
-    setNewFolderName('');
-    closeContextMenu();
-  };
-
   const handleDeleteFile = (filePath) => {
     if (!filePath) return;
     const isFolderPath = isFolder(filePath);
@@ -72,29 +63,13 @@ export default function TreeFileExplorer({ files, onAddFile, onDeleteFile, onAdd
       const filePath = `${cleanFolderPath}/${newFileName}`.replace(/\/+/g, '/');
       
       if (onAddFile) {
-        onAddFile(filePath, '// New file\n');
+        onAddFile(filePath, '');
       }
       setNewFileName('');
       setShowNewFileInput(null);
     } else if (e.key === 'Escape') {
       setNewFileName('');
       setShowNewFileInput(null);
-    }
-  };
-
-  const handleCreateFolder = (e, parentPath) => {
-    if (e.key === 'Enter' && newFolderName.trim()) {
-      const cleanParentPath = parentPath === '/' ? '' : parentPath;
-      const folderPath = `${cleanParentPath}/${newFolderName}`.replace(/\/+/g, '/');
-      
-      if (onAddFolder) {
-        onAddFolder(newFolderName, parentPath);
-      }
-      setNewFolderName('');
-      setShowNewFolderInput(null);
-    } else if (e.key === 'Escape') {
-      setNewFolderName('');
-      setShowNewFolderInput(null);
     }
   };
 
@@ -225,26 +200,6 @@ export default function TreeFileExplorer({ files, onAddFile, onDeleteFile, onAdd
           </div>
         )}
 
-        {/* New Folder Input */}
-        {showNewFolderInput === node.path && (
-          <div className="px-2" style={{ paddingLeft: paddingLeft + 16 }}>
-            <div className="flex items-center">
-              <span className="mr-2">📁</span>
-              <input
-                type="text"
-                value={newFolderName}
-                onChange={(e) => setNewFolderName(e.target.value)}
-                onKeyDown={(e) => handleCreateFolder(e, node.path)}
-                onBlur={() => setShowNewFolderInput(null)}
-                className="text-sm px-2 py-1 rounded flex-1"
-                placeholder="folder-name"
-                autoFocus
-                style={{ background: 'var(--input)', color: 'var(--foreground)' }}
-              />
-            </div>
-          </div>
-        )}
-
         {/* New File Input */}
         {showNewFileInput === node.path && (
           <div 
@@ -260,7 +215,7 @@ export default function TreeFileExplorer({ files, onAddFile, onDeleteFile, onAdd
                 onKeyDown={(e) => handleCreateFile(e, node.path)}
                 onBlur={() => setShowNewFileInput(null)}
                 className="text-sm px-2 py-1 rounded flex-1"
-                placeholder="filename.js"
+                placeholder="path/to/file.js or file.js"
                 autoFocus
                 style={{ background: 'var(--input)', color: 'var(--foreground)' }}
               />
@@ -307,16 +262,8 @@ export default function TreeFileExplorer({ files, onAddFile, onDeleteFile, onAdd
             <button
               onClick={() => handleAddNewFile('/')}
               className="btn-icon"
-              title="New File"
+              title="New File (use / for folders)"
               aria-label="New file"
-            >
-              📄
-            </button>
-            <button
-              onClick={() => handleAddNewFolder('/')}
-              className="btn-icon"
-              title="New Folder"
-              aria-label="New folder"
             >
               📁
             </button>
@@ -352,12 +299,6 @@ export default function TreeFileExplorer({ files, onAddFile, onDeleteFile, onAdd
                 className="block w-full text-left px-3 py-1 text-sm text-gray-300 hover:bg-gray-600"
               >
                 📄 New File
-              </button>
-              <button
-                onClick={() => handleAddNewFolder(contextMenu.filePath)}
-                className="block w-full text-left px-3 py-1 text-sm text-gray-300 hover:bg-gray-600"
-              >
-                📁 New Folder
               </button>
               <hr className="border-gray-600 my-1" />
             </>

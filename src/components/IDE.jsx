@@ -177,11 +177,6 @@ export default function IDE({
     }
   };
 
-  const handleAddFolder = (folderName, parentPath = '/') => {
-    const indexFile = joinPath(parentPath === '/' ? '' : parentPath, folderName, 'index.js');
-    handleAddFile(indexFile, '// Folder created\n');
-  };
-
   const handleRenameFile = (oldPath, newName) => {
     if (!oldPath || !newName) return;
     const isFolderPath = isFolder(oldPath);
@@ -341,7 +336,6 @@ export default function IDE({
           files={files}
           onAddFile={handleAddFile}
           onDeleteFile={handleDeleteFile}
-          onAddFolder={handleAddFolder}
           onRenameFile={handleRenameFile}
           onOpenFile={handleOpenFile}
           activeFile={activeFile}
