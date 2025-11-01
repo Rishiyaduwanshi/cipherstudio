@@ -1,9 +1,9 @@
-import { BadRequestError, UnauthorizedError } from '../utils/appError.js';
-import appResponse from '../utils/appResponse.js';
-import UserModel from '../models/user.model.js';
-import setTokenCookies from '../utils/setTokenCookies.js';
-import jwt from 'jsonwebtoken';
-import { config } from '../../config/index.js';
+import { BadRequestError, UnauthorizedError } from "../utils/appError.js";
+import appResponse from "../utils/appResponse.js";
+import UserModel from "../models/user.model.js";
+import setTokenCookies from "../utils/setTokenCookies.js";
+import jwt from "jsonwebtoken";
+import { config } from "../../config/index.js";
 
 // Generate tokens
 const generateTokens = (userId) => {
@@ -24,12 +24,12 @@ export const register = async (req, res, next) => {
     const { email, password, name } = req.body;
 
     if (!email || !password || !name) {
-      throw new BadRequestError('Email, password  and name are required');
+      throw new BadRequestError("Email, password  and name are required");
     }
 
     const existingUser = await UserModel.findOne({ email });
     if (existingUser) {
-      throw new BadRequestError('User with this email already exists');
+      throw new BadRequestError("User with this email already exists");
     }
 
     const user = await UserModel.create({ email, password, name });
@@ -44,7 +44,7 @@ export const register = async (req, res, next) => {
 
     appResponse(res, {
       statusCode: 201,
-      message: 'User registered successfully',
+      message: "User registered successfully",
       data: { user: userResponse, token: tokens.accessToken },
     });
   } catch (error) {
@@ -58,12 +58,12 @@ export const login = async (req, res, next) => {
     const { email, password } = req.body;
 
     if (!email || !password) {
-      throw new BadRequestError('Email and password are required');
+      throw new BadRequestError("Email and password are required");
     }
 
     const user = await UserModel.findOne({ email });
     if (!user || !(await user.comparePassword(password))) {
-      throw new UnauthorizedError('Invalid credentials');
+      throw new UnauthorizedError("Invalid credentials");
     }
 
     user.lastLoggedIn = new Date();
@@ -79,7 +79,7 @@ export const login = async (req, res, next) => {
     setTokenCookies(res, tokens);
 
     appResponse(res, {
-      message: 'Login successful',
+      message: "Login successful",
       data: { user: userResponse, token: tokens.accessToken },
     });
   } catch (error) {
@@ -92,13 +92,13 @@ export const refreshToken = async (req, res, next) => {
   try {
     const { refreshToken } = req.cookies;
     if (!refreshToken) {
-      throw new UnauthorizedError('Refresh token not found in cookie');
+      throw new UnauthorizedError("Refresh token not found in cookie");
     }
 
     const decoded = jwt.verify(refreshToken, config.JWT_REFRESH_SECRET);
     const user = await UserModel.findById(decoded._id);
     if (!user || user.refreshToken !== refreshToken) {
-      throw new UnauthorizedError('Invalid refresh token');
+      throw new UnauthorizedError("Invalid refresh token");
     }
 
     const tokens = generateTokens(user._id);
@@ -107,11 +107,11 @@ export const refreshToken = async (req, res, next) => {
     setTokenCookies(res, tokens);
 
     appResponse(res, {
-      message: 'Token refreshed successfully',
+      message: "Token refreshed successfully",
     });
   } catch (error) {
     if (error instanceof jwt.JsonWebTokenError) {
-      next(new UnauthorizedError('Invalid refresh token'));
+      next(new UnauthorizedError("Invalid refresh token"));
     } else {
       next(error);
     }
@@ -126,11 +126,11 @@ export const logout = async (req, res, next) => {
       await UserModel.updateRefreshToken(userId, null);
     }
 
-    res.clearCookie('accessToken');
-    res.clearCookie('refreshToken');
+    res.clearCookie("accessToken");
+    res.clearCookie("refreshToken");
 
     appResponse(res, {
-      message: 'Signed out successfully',
+      message: "Signed out successfully",
     });
   } catch (error) {
     next(error);

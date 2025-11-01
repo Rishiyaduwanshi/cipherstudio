@@ -1,4 +1,4 @@
-# 📘 Cipher Studio API Documentation
+# 📘 Code Studio API Documentation
 
 **Version:** 1.0.0
 **Base URL (production):** `https://studio.koyeb.app/api/v1`
@@ -39,7 +39,7 @@
 
 ## 🔍 Overview
 
-Cipher Studio API is a RESTful service for user authentication and managing code projects. Responses are consistent across endpoints and use JWT tokens stored as HTTP-only cookies for security.
+Code Studio API is a RESTful service for user authentication and managing code projects. Responses are consistent across endpoints and use JWT tokens stored as HTTP-only cookies for security.
 
 Key principles:
 

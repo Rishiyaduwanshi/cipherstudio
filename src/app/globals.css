@@ -1,56 +1,56 @@
 @import "tailwindcss";
 
 :root {
-  /* CipherStudio Custom Theme - Single Source of Truth */
+  /* codestudio Custom Theme - Single Source of Truth */
   --background: #0a0a0a;
   --foreground: #ffffff;
   --card: #111111;
   --card-foreground: #ffffff;
   --popover: #111111;
   --popover-foreground: #ffffff;
-  
+
   /* Primary brand color - Indigo instead of generic blue */
   --primary: #6366f1;
   --primary-hover: #4f46e5;
   --primary-active: #4338ca;
   --primary-foreground: #ffffff;
-  
+
   /* Secondary colors */
   --secondary: #1f1f23;
   --secondary-hover: #27272a;
   --secondary-foreground: #ffffff;
-  
+
   /* Muted/subtle backgrounds */
   --muted: #1f1f23;
   --muted-foreground: #a1a1aa;
-  
+
   /* Accent color - for highlights */
   --accent: #1f1f23;
   --accent-foreground: #ffffff;
-  
+
   /* Status colors */
   --success: #10b981;
   --success-hover: #059669;
   --success-foreground: #ffffff;
-  
+
   --warning: #f59e0b;
   --warning-hover: #d97706;
   --warning-foreground: #ffffff;
-  
+
   --destructive: #ef4444;
   --destructive-hover: #dc2626;
   --destructive-foreground: #ffffff;
-  
+
   --info: #3b82f6;
   --info-hover: #2563eb;
   --info-foreground: #ffffff;
-  
+
   /* Borders and inputs */
   --border: #27272a;
   --border-hover: #3f3f46;
   --input: #27272a;
   --ring: #6366f1;
-  
+
   /* Semantic grays */
   --gray-50: #fafafa;
   --gray-100: #f4f4f5;
@@ -62,7 +62,7 @@
   --gray-700: #3f3f46;
   --gray-800: #27272a;
   --gray-900: #18181b;
-  
+
   --radius: 0.5rem;
 }
 
@@ -73,43 +73,43 @@
   --card-foreground: #0a0a0a;
   --popover: #ffffff;
   --popover-foreground: #0a0a0a;
-  
+
   --primary: #6366f1;
   --primary-hover: #4f46e5;
   --primary-active: #4338ca;
   --primary-foreground: #ffffff;
-  
+
   --secondary: #f4f4f5;
   --secondary-hover: #e4e4e7;
   --secondary-foreground: #0a0a0a;
-  
+
   --muted: #f4f4f5;
   --muted-foreground: #71717a;
-  
+
   --accent: #f4f4f5;
   --accent-foreground: #0a0a0a;
-  
+
   --success: #10b981;
   --success-hover: #059669;
   --success-foreground: #ffffff;
-  
+
   --warning: #f59e0b;
   --warning-hover: #d97706;
   --warning-foreground: #ffffff;
-  
+
   --destructive: #ef4444;
   --destructive-hover: #dc2626;
   --destructive-foreground: #ffffff;
-  
+
   --info: #3b82f6;
   --info-hover: #2563eb;
   --info-foreground: #ffffff;
-  
+
   --border: #e4e4e7;
   --border-hover: #d4d4d8;
   --input: #e4e4e7;
   --ring: #6366f1;
-  
+
   --gray-50: #fafafa;
   --gray-100: #f4f4f5;
   --gray-200: #e4e4e7;
@@ -131,7 +131,7 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: "Inter", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   margin: 0;
   padding: 0;
   -webkit-font-smoothing: antialiased;
@@ -145,7 +145,11 @@ body {
 
 /* Faster transitions */
 * {
-  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease, opacity 0.15s ease;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease,
+    border-color 0.15s ease,
+    opacity 0.15s ease;
   will-change: auto;
 }
 
@@ -169,7 +173,9 @@ body {
 }
 /* Optimize button hover states */
 button {
-  transition: background-color 0.15s ease, transform 0.1s ease;
+  transition:
+    background-color 0.15s ease,
+    transform 0.1s ease;
   will-change: background-color;
   cursor: pointer;
 }
@@ -190,7 +196,7 @@ button:active {
 
 /* Improve text rendering */
 .font-mono {
-  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+  font-family: "Consolas", "Monaco", "Courier New", monospace;
   font-variant-ligatures: none;
 }
 
@@ -205,7 +211,8 @@ button:active {
   -moz-osx-font-smoothing: auto;
 }
 
-.editor-isolation, .editor-isolation * {
+.editor-isolation,
+.editor-isolation * {
   transition: none !important;
   transform: none !important;
 }
@@ -245,7 +252,7 @@ button:active {
 }
 
 .btn-ghost:hover {
-  background: rgba(255,255,255,0.03);
+  background: rgba(255, 255, 255, 0.03);
 }
 
 .badge-dirty {
@@ -268,9 +275,17 @@ button:active {
   background: transparent;
   border: 1px solid transparent;
 }
-.btn-icon svg { width: 18px; height: 18px; }
-.btn-icon:hover { background: rgba(255,255,255,0.03); }
-.btn-icon.active { background: rgba(99,102,241,0.12); border-color: rgba(99,102,241,0.12); }
+.btn-icon svg {
+  width: 18px;
+  height: 18px;
+}
+.btn-icon:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+.btn-icon.active {
+  background: rgba(99, 102, 241, 0.12);
+  border-color: rgba(99, 102, 241, 0.12);
+}
 
 /* Primary action button (e.g. New file) */
 .btn-primary {
@@ -285,55 +300,139 @@ button:active {
 }
 
 /* Utility Classes - Single Source of Truth for Colors */
-.bg-primary { background-color: var(--primary); }
-.bg-primary-hover:hover { background-color: var(--primary-hover); }
-.bg-secondary { background-color: var(--secondary); }
-.bg-secondary-hover:hover { background-color: var(--secondary-hover); }
-.bg-success { background-color: var(--success); }
-.bg-success-hover:hover { background-color: var(--success-hover); }
-.bg-warning { background-color: var(--warning); }
-.bg-warning-hover:hover { background-color: var(--warning-hover); }
-.bg-destructive { background-color: var(--destructive); }
-.bg-destructive-hover:hover { background-color: var(--destructive-hover); }
-.bg-info { background-color: var(--info); }
-.bg-info-hover:hover { background-color: var(--info-hover); }
-.bg-muted { background-color: var(--muted); }
-.bg-card { background-color: var(--card); }
+.bg-primary {
+  background-color: var(--primary);
+}
+.bg-primary-hover:hover {
+  background-color: var(--primary-hover);
+}
+.bg-secondary {
+  background-color: var(--secondary);
+}
+.bg-secondary-hover:hover {
+  background-color: var(--secondary-hover);
+}
+.bg-success {
+  background-color: var(--success);
+}
+.bg-success-hover:hover {
+  background-color: var(--success-hover);
+}
+.bg-warning {
+  background-color: var(--warning);
+}
+.bg-warning-hover:hover {
+  background-color: var(--warning-hover);
+}
+.bg-destructive {
+  background-color: var(--destructive);
+}
+.bg-destructive-hover:hover {
+  background-color: var(--destructive-hover);
+}
+.bg-info {
+  background-color: var(--info);
+}
+.bg-info-hover:hover {
+  background-color: var(--info-hover);
+}
+.bg-muted {
+  background-color: var(--muted);
+}
+.bg-card {
+  background-color: var(--card);
+}
 
-.text-primary { color: var(--primary); }
-.text-secondary { color: var(--secondary-foreground); }
-.text-success { color: var(--success); }
-.text-warning { color: var(--warning); }
-.text-destructive { color: var(--destructive); }
-.text-info { color: var(--info); }
-.text-muted { color: var(--muted-foreground); }
-.text-foreground { color: var(--foreground); }
+.text-primary {
+  color: var(--primary);
+}
+.text-secondary {
+  color: var(--secondary-foreground);
+}
+.text-success {
+  color: var(--success);
+}
+.text-warning {
+  color: var(--warning);
+}
+.text-destructive {
+  color: var(--destructive);
+}
+.text-info {
+  color: var(--info);
+}
+.text-muted {
+  color: var(--muted-foreground);
+}
+.text-foreground {
+  color: var(--foreground);
+}
 
-.border-primary { border-color: var(--primary); }
-.border-secondary { border-color: var(--border); }
-.border-destructive { border-color: var(--destructive); }
+.border-primary {
+  border-color: var(--primary);
+}
+.border-secondary {
+  border-color: var(--border);
+}
+.border-destructive {
+  border-color: var(--destructive);
+}
 
 /* Gray scale utilities */
-.bg-gray-50 { background-color: var(--gray-50); }
-.bg-gray-100 { background-color: var(--gray-100); }
-.bg-gray-200 { background-color: var(--gray-200); }
-.bg-gray-300 { background-color: var(--gray-300); }
-.bg-gray-400 { background-color: var(--gray-400); }
-.bg-gray-500 { background-color: var(--gray-500); }
-.bg-gray-600 { background-color: var(--gray-600); }
-.bg-gray-700 { background-color: var(--gray-700); }
-.bg-gray-800 { background-color: var(--gray-800); }
-.bg-gray-900 { background-color: var(--gray-900); }
+.bg-gray-50 {
+  background-color: var(--gray-50);
+}
+.bg-gray-100 {
+  background-color: var(--gray-100);
+}
+.bg-gray-200 {
+  background-color: var(--gray-200);
+}
+.bg-gray-300 {
+  background-color: var(--gray-300);
+}
+.bg-gray-400 {
+  background-color: var(--gray-400);
+}
+.bg-gray-500 {
+  background-color: var(--gray-500);
+}
+.bg-gray-600 {
+  background-color: var(--gray-600);
+}
+.bg-gray-700 {
+  background-color: var(--gray-700);
+}
+.bg-gray-800 {
+  background-color: var(--gray-800);
+}
+.bg-gray-900 {
+  background-color: var(--gray-900);
+}
 
-.text-gray-300 { color: var(--gray-300); }
-.text-gray-400 { color: var(--gray-400); }
-.text-gray-500 { color: var(--gray-500); }
-.text-gray-600 { color: var(--gray-600); }
+.text-gray-300 {
+  color: var(--gray-300);
+}
+.text-gray-400 {
+  color: var(--gray-400);
+}
+.text-gray-500 {
+  color: var(--gray-500);
+}
+.text-gray-600 {
+  color: var(--gray-600);
+}
 
-.hover\:bg-gray-600:hover { background-color: var(--gray-600); }
-.hover\:bg-gray-700:hover { background-color: var(--gray-700); }
+.hover\:bg-gray-600:hover {
+  background-color: var(--gray-600);
+}
+.hover\:bg-gray-700:hover {
+  background-color: var(--gray-700);
+}
 
-.border-gray-600 { border-color: var(--gray-600); }
+.border-gray-600 {
+  border-color: var(--gray-600);
+}
 
 /* Common button patterns */
 .btn-success {

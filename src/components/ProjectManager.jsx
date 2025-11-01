@@ -1,13 +1,18 @@
-'use client';
-import React, { useState, useEffect } from 'react';
-import { initialFiles } from '@/data/initialProject-react';
-import { toast } from 'react-toastify';
-import projectAPI from '@/services/projectAPI';
-import { useRouter } from 'next/navigation';
-import CreateProjectModal from './CreateProjectModal';
-import DownloadButton from './DownloadButton';
-import { getLocalProjects, saveLocalProject, getStorageItem, setStorageItem } from '@/utils/storage';
-import { HTTP_STATUS, ROUTES, UI } from '@/constants';
+"use client";
+import React, { useState, useEffect } from "react";
+import { initialFiles } from "@/data/initialProject-react";
+import { toast } from "react-toastify";
+import projectAPI from "@/services/projectAPI";
+import { useRouter } from "next/navigation";
+import CreateProjectModal from "./CreateProjectModal";
+import DownloadButton from "./DownloadButton";
+import {
+  getLocalProjects,
+  saveLocalProject,
+  getStorageItem,
+  setStorageItem,
+} from "@/utils/storage";
+import { HTTP_STATUS, ROUTES, UI } from "@/constants";
 
 export default function ProjectManager({ project, setProject }) {
   const [showProjectModal, setShowProjectModal] = useState(false);
@@ -27,18 +32,18 @@ export default function ProjectManager({ project, setProject }) {
         const resp = await projectAPI.getProjects({ limit: 20 });
         serverProjects = Array.isArray(resp) ? resp : resp.projects || resp;
       } catch (e) {
-        console.warn('Failed to fetch server projects', e);
+        console.warn("Failed to fetch server projects", e);
         if (e?.response?.status === HTTP_STATUS.UNAUTHORIZED) {
           router.push(ROUTES.SIGNIN);
           return;
         }
-        toast.error('Failed to fetch server projects');
+        toast.error("Failed to fetch server projects");
       }
 
       const serverEntries = (serverProjects || []).map((p) => ({
-        source: 'server',
+        source: "server",
         id: p._id || p.id,
-        name: p.name || 'Untitled',
+        name: p.name || "Untitled",
         files: p.files || {},
         project: p,
         listId: `server-${p._id || p.id}`,
@@ -47,8 +52,8 @@ export default function ProjectManager({ project, setProject }) {
       const localEntries = getLocalProjects();
       setSavedProjects([...serverEntries, ...localEntries]);
     } catch (error) {
-      console.error('❌ Load projects error:', error);
-      toast.error(error?.message || 'Failed to load projects');
+      console.error("❌ Load projects error:", error);
+      toast.error(error?.message || "Failed to load projects");
     } finally {
       setLoading(false);
     }
@@ -59,10 +64,10 @@ export default function ProjectManager({ project, setProject }) {
   const saveProjectAs = () => {
     try {
       saveLocalProject(project);
-      toast.success(`Project "${project?.name || 'Untitled'}" saved locally`);
+      toast.success(`Project "${project?.name || "Untitled"}" saved locally`);
     } catch (e) {
-      console.error('Save local project failed', e);
-      toast.error('Failed to save project locally');
+      console.error("Save local project failed", e);
+      toast.error("Failed to save project locally");
     }
   };
 
@@ -73,33 +78,33 @@ export default function ProjectManager({ project, setProject }) {
       // Make sure we're sending the latest file changes
       const currentProject = {
         ...project,
-        files: project.files // Use the files directly from project state
+        files: project.files, // Use the files directly from project state
       };
-      
+
       const savedProject = project._id
         ? await projectAPI.updateProject(project._id, currentProject)
         : await projectAPI.createProject(currentProject);
 
       // update current project with server response but keep our local files
-      setProject((prev) => ({ 
-        ...(prev || {}), 
+      setProject((prev) => ({
+        ...(prev || {}),
         ...savedProject,
-        files: currentProject.files // Keep our current files
+        files: currentProject.files, // Keep our current files
       }));
-      
-      toast.success('Project saved to server');
+
+      toast.success("Project saved to server");
 
       if (!project._id && savedProject._id) {
         router.push(ROUTES.PROJECT_DETAIL(savedProject._id));
       }
     } catch (e) {
-      console.error('Save to server failed', e);
+      console.error("Save to server failed", e);
       if (e?.response?.status === HTTP_STATUS.UNAUTHORIZED) {
         router.push(ROUTES.SIGNIN);
         return;
       }
       toast.error(
-        e?.response?.data?.message || e?.message || 'Failed to save to server'
+        e?.response?.data?.message || e?.message || "Failed to save to server",
       );
     } finally {
       setSaving(false);
@@ -111,14 +116,14 @@ export default function ProjectManager({ project, setProject }) {
       const savedProject = getStorageItem(storageKey);
       if (savedProject) {
         setProject(savedProject);
-        setStorageItem('cipherstudio-project', savedProject);
+        setStorageItem("codestudio-project", savedProject);
         toast.success(
-          `Loaded local project: ${savedProject?.name || 'Untitled'}`
+          `Loaded local project: ${savedProject?.name || "Untitled"}`,
         );
       }
     } catch (e) {
-      console.error('Load local project failed', e);
-      toast.error('Failed to load local project');
+      console.error("Load local project failed", e);
+      toast.error("Failed to load local project");
     } finally {
       setShowLoadModal(false);
     }
@@ -148,7 +153,7 @@ export default function ProjectManager({ project, setProject }) {
                 disabled={saving}
                 className="px-3 py-1 bg-primary text-white rounded text-sm hover:bg-primary-hover disabled:opacity-60 transition-colors"
               >
-                {saving ? 'Saving...' : 'Save to Server'}
+                {saving ? "Saving..." : "Save to Server"}
               </button>
               <button
                 onClick={loadSavedProjects}
@@ -170,7 +175,7 @@ export default function ProjectManager({ project, setProject }) {
                 key={proj.listId}
                 className="bg-gray-800 p-4 rounded-lg hover:bg-gray-700 cursor-pointer transition-colors"
                 onClick={() => {
-                  if (proj.source === 'server') {
+                  if (proj.source === "server") {
                     router.push(`/projects/${proj.id}`);
                   } else {
                     loadLocalProject(proj.storageKey);
@@ -184,10 +189,10 @@ export default function ProjectManager({ project, setProject }) {
                   </span>
                   <span
                     className={`text-xs px-2 py-1 rounded ${
-                      proj.source === 'server' ? 'bg-primary' : 'bg-gray-600'
+                      proj.source === "server" ? "bg-primary" : "bg-gray-600"
                     }`}
                   >
-                    {proj.source === 'server' ? 'Server' : 'Local'}
+                    {proj.source === "server" ? "Server" : "Local"}
                   </span>
                 </div>
               </div>
@@ -203,7 +208,7 @@ export default function ProjectManager({ project, setProject }) {
         onSuccess={(newProject) => {
           setProject(newProject);
           loadSavedProjects(); // Refresh the project list
-          toast.success('Project created successfully!');
+          toast.success("Project created successfully!");
         }}
       />
 
@@ -226,7 +231,7 @@ export default function ProjectManager({ project, setProject }) {
                   <div
                     key={proj.listId}
                     onClick={() => {
-                      if (proj.source === 'server') {
+                      if (proj.source === "server") {
                         router.push(ROUTES.PROJECT_DETAIL(proj.id));
                         setShowLoadModal(false);
                       } else {
@@ -243,10 +248,10 @@ export default function ProjectManager({ project, setProject }) {
                     </div>
                     <div
                       className={`text-xs px-2 py-1 rounded ${
-                        proj.source === 'server' ? 'bg-primary' : 'bg-gray-600'
+                        proj.source === "server" ? "bg-primary" : "bg-gray-600"
                       }`}
                     >
-                      {proj.source === 'server' ? 'Server' : 'Local'}
+                      {proj.source === "server" ? "Server" : "Local"}
                     </div>
                   </div>
                 ))}

@@ -2,13 +2,13 @@
  * Tree Node class for file explorer
  */
 class TreeNode {
-  constructor(name, type = 'file', path = '') {
+  constructor(name, type = "file", path = "") {
     this.name = name;
-    this.type = type; 
+    this.type = type;
     this.path = path;
-    this.children = new Map(); 
-    this.isExpanded = true; 
-    this.content = '';
+    this.children = new Map();
+    this.isExpanded = true;
+    this.content = "";
   }
 
   addChild(node) {
@@ -33,7 +33,7 @@ class TreeNode {
       if (a.type === b.type) {
         return a.name.localeCompare(b.name);
       }
-      return a.type === 'folder' ? -1 : 1;
+      return a.type === "folder" ? -1 : 1;
     });
   }
 
@@ -47,7 +47,7 @@ class TreeNode {
  */
 export class FileTreeManager {
   constructor() {
-    this.root = new TreeNode('root', 'folder', '/');
+    this.root = new TreeNode("root", "folder", "/");
   }
 
   /**
@@ -57,10 +57,10 @@ export class FileTreeManager {
     // Save expanded states before rebuilding
     const expandedStates = new Map();
     this.saveExpandedStates(this.root, expandedStates);
-    
-    this.root = new TreeNode('root', 'folder', '/');
-    
-    Object.keys(files).forEach(filePath => {
+
+    this.root = new TreeNode("root", "folder", "/");
+
+    Object.keys(files).forEach((filePath) => {
       this.addFile(filePath, files[filePath]);
     });
 
@@ -75,11 +75,11 @@ export class FileTreeManager {
    */
   saveExpandedStates(node, statesMap) {
     if (!node) return;
-    
-    if (node.type === 'folder' && node.path) {
+
+    if (node.type === "folder" && node.path) {
       statesMap.set(node.path, node.isExpanded);
     }
-    
+
     if (node.children) {
       for (const child of node.children.values()) {
         this.saveExpandedStates(child, statesMap);
@@ -92,11 +92,11 @@ export class FileTreeManager {
    */
   restoreExpandedStates(node, statesMap) {
     if (!node) return;
-    
-    if (node.type === 'folder' && node.path && statesMap.has(node.path)) {
+
+    if (node.type === "folder" && node.path && statesMap.has(node.path)) {
       node.isExpanded = statesMap.get(node.path);
     }
-    
+
     if (node.children) {
       for (const child of node.children.values()) {
         this.restoreExpandedStates(child, statesMap);
@@ -108,27 +108,30 @@ export class FileTreeManager {
    * Add a file to the tree
    */
   addFile(filePath, fileContent) {
-    const parts = filePath.split('/').filter(Boolean);
+    const parts = filePath.split("/").filter(Boolean);
     let currentNode = this.root;
-    let currentPath = '';
+    let currentPath = "";
 
     // Navigate/create path
     for (let i = 0; i < parts.length; i++) {
       const part = parts[i];
-      currentPath += '/' + part;
-      
+      currentPath += "/" + part;
+
       if (!currentNode.hasChild(part)) {
         const isLastPart = i === parts.length - 1;
-        const nodeType = isLastPart ? 'file' : 'folder';
+        const nodeType = isLastPart ? "file" : "folder";
         const newNode = new TreeNode(part, nodeType, currentPath);
-        
+
         if (isLastPart && fileContent) {
-          newNode.content = typeof fileContent === 'string' ? fileContent : (fileContent.code || fileContent.content || '');
+          newNode.content =
+            typeof fileContent === "string"
+              ? fileContent
+              : fileContent.code || fileContent.content || "";
         }
-        
+
         currentNode.addChild(newNode);
       }
-      
+
       currentNode = currentNode.getChild(part);
     }
   }
@@ -137,7 +140,7 @@ export class FileTreeManager {
    * Remove a file from the tree
    */
   removeFile(filePath) {
-    const parts = filePath.split('/').filter(Boolean);
+    const parts = filePath.split("/").filter(Boolean);
     if (parts.length === 0) return false;
 
     let currentNode = this.root;
@@ -147,7 +150,7 @@ export class FileTreeManager {
     for (let i = 0; i < parts.length - 1; i++) {
       const part = parts[i];
       if (!currentNode.hasChild(part)) return false;
-      
+
       currentNode = currentNode.getChild(part);
       pathNodes.push(currentNode);
     }
@@ -155,12 +158,12 @@ export class FileTreeManager {
     // Remove the file
     const fileName = parts[parts.length - 1];
     if (!currentNode.hasChild(fileName)) return false;
-    
+
     currentNode.removeChild(fileName);
 
     // Clean up empty folders
     this.cleanupEmptyFolders(pathNodes, parts);
-    
+
     return true;
   }
 
@@ -171,8 +174,8 @@ export class FileTreeManager {
     for (let i = pathNodes.length - 1; i > 0; i--) {
       const node = pathNodes[i];
       const parentNode = pathNodes[i - 1];
-      
-      if (node.type === 'folder' && node.children.size === 0) {
+
+      if (node.type === "folder" && node.children.size === 0) {
         parentNode.removeChild(node.name);
       } else {
         break; // Stop if we find a non-empty folder
@@ -185,13 +188,13 @@ export class FileTreeManager {
    */
   getFilesObject() {
     const files = {};
-    
+
     const traverse = (node) => {
-      if (node.type === 'file') {
+      if (node.type === "file") {
         files[node.path] = { code: node.content };
       }
-      
-      node.getChildrenArray().forEach(child => {
+
+      node.getChildrenArray().forEach((child) => {
         traverse(child);
       });
     };
@@ -204,7 +207,7 @@ export class FileTreeManager {
    * Toggle folder expanded state
    */
   toggleFolder(folderPath) {
-    const parts = folderPath.split('/').filter(Boolean);
+    const parts = folderPath.split("/").filter(Boolean);
     let currentNode = this.root;
 
     for (const part of parts) {
@@ -212,11 +215,11 @@ export class FileTreeManager {
       currentNode = currentNode.getChild(part);
     }
 
-    if (currentNode.type === 'folder') {
+    if (currentNode.type === "folder") {
       currentNode.toggleExpanded();
       return true;
     }
-    
+
     return false;
   }
 
@@ -224,7 +227,7 @@ export class FileTreeManager {
    * Check if a path exists
    */
   pathExists(filePath) {
-    const parts = filePath.split('/').filter(Boolean);
+    const parts = filePath.split("/").filter(Boolean);
     let currentNode = this.root;
 
     for (const part of parts) {

@@ -1,4 +1,4 @@
-# 🚀 Cipher Studio
+# 🚀 Code Studio
 
 > Online code editor and IDE built with Next.js & Node.js. Write, edit, and preview your code in real-time with Monaco Editor.
 
@@ -76,8 +76,8 @@ graph TB
 
 ```bash
 # Clone & Install
-git clone https://github.com/rishiyaduwanshi/cipherstudio.git
-cd cipherstudio
+git clone https://github.com/rishiyaduwanshi/codestudio.git
+cd codestudio
 pnpm install
 
 # Frontend (Port 3000)

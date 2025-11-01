@@ -1,17 +1,17 @@
-import { Router } from 'express';
+import { Router } from "express";
 import {
   register as signup,
   login as signin,
   refreshToken,
   logout as signout,
-} from '../controllers/auth.controller.js';
+} from "../controllers/auth.controller.js";
 
 const router = Router();
 
 // Auth routes
-router.post('/signup', signup);
-router.post('/signin', signin);
-router.post('/refresh-token', refreshToken);
-router.post('/signout', signout);
+router.post("/signup", signup);
+router.post("/signin", signin);
+router.post("/refresh-token", refreshToken);
+router.post("/signout", signout);
 
 export default router;

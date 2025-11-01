@@ -1,8 +1,16 @@
-'use client';
-import React, { forwardRef, useImperativeHandle, useRef, useEffect } from 'react';
-import MonacoIframe from './MonacoIframe';
+"use client";
+import React, {
+  forwardRef,
+  useImperativeHandle,
+  useRef,
+  useEffect,
+} from "react";
+import MonacoIframe from "./MonacoIframe";
 
-const CodeEditor = forwardRef(function CodeEditor({ language = 'javascript', code, onChange, onCursor, options = {} }, ref) {
+const CodeEditor = forwardRef(function CodeEditor(
+  { language = "javascript", code, onChange, onCursor, options = {} },
+  ref,
+) {
   const iframeRef = useRef(null);
 
   useImperativeHandle(ref, () => ({
@@ -14,8 +22,7 @@ const CodeEditor = forwardRef(function CodeEditor({ language = 'javascript', cod
     setLanguage: (l) => iframeRef.current?.setLanguage(l),
   }));
 
-  useEffect(() => {
-  }, []);
+  useEffect(() => {}, []);
 
   return (
     <div className="editor-isolation">

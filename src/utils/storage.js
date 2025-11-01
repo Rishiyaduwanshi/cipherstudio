@@ -4,9 +4,9 @@
  */
 
 const STORAGE_KEYS = {
-	THEME: 'cipherstudio-theme',
-	TEMP_PROJECT: 'cipherstudio-temp',
-	PROJECT_PREFIX: 'cipherstudio-project',
+  THEME: "codestudio-theme",
+  TEMP_PROJECT: "codestudio-temp",
+  PROJECT_PREFIX: "codestudio-project",
 };
 
 /**
@@ -16,13 +16,13 @@ const STORAGE_KEYS = {
  * @returns {*} Parsed value or default
  */
 export function getStorageItem(key, defaultValue = null) {
-	try {
-		const item = localStorage.getItem(key);
-		return item ? JSON.parse(item) : defaultValue;
-	} catch (error) {
-		console.warn(`Failed to parse localStorage item: ${key}`, error);
-		return defaultValue;
-	}
+  try {
+    const item = localStorage.getItem(key);
+    return item ? JSON.parse(item) : defaultValue;
+  } catch (error) {
+    console.warn(`Failed to parse localStorage item: ${key}`, error);
+    return defaultValue;
+  }
 }
 
 /**
@@ -32,13 +32,13 @@ export function getStorageItem(key, defaultValue = null) {
  * @returns {boolean} Success status
  */
 export function setStorageItem(key, value) {
-	try {
-		localStorage.setItem(key, JSON.stringify(value));
-		return true;
-	} catch (error) {
-		console.error(`Failed to set localStorage item: ${key}`, error);
-		return false;
-	}
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+    return true;
+  } catch (error) {
+    console.error(`Failed to set localStorage item: ${key}`, error);
+    return false;
+  }
 }
 
 /**
@@ -46,13 +46,13 @@ export function setStorageItem(key, value) {
  * @param {string} key - Storage key
  */
 export function removeStorageItem(key) {
-	try {
-		localStorage.removeItem(key);
-		return true;
-	} catch (error) {
-		console.error(`Failed to remove localStorage item: ${key}`, error);
-		return false;
-	}
+  try {
+    localStorage.removeItem(key);
+    return true;
+  } catch (error) {
+    console.error(`Failed to remove localStorage item: ${key}`, error);
+    return false;
+  }
 }
 
 /**
@@ -60,28 +60,28 @@ export function removeStorageItem(key) {
  * @returns {Array} Array of project entries
  */
 export function getLocalProjects() {
-	const projects = [];
-	try {
-		for (let i = 0; i < localStorage.length; i++) {
-			const key = localStorage.key(i);
-			if (key?.startsWith(STORAGE_KEYS.PROJECT_PREFIX)) {
-				const project = getStorageItem(key);
-				if (project) {
-					projects.push({
-						source: 'local',
-						storageKey: key,
-						name: project?.name || 'Local project',
-						files: project?.files || {},
-						project,
-						listId: `local-${key}`,
-					});
-				}
-			}
-		}
-	} catch (error) {
-		console.error('Failed to get local projects', error);
-	}
-	return projects;
+  const projects = [];
+  try {
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key?.startsWith(STORAGE_KEYS.PROJECT_PREFIX)) {
+        const project = getStorageItem(key);
+        if (project) {
+          projects.push({
+            source: "local",
+            storageKey: key,
+            name: project?.name || "Local project",
+            files: project?.files || {},
+            project,
+            listId: `local-${key}`,
+          });
+        }
+      }
+    }
+  } catch (error) {
+    console.error("Failed to get local projects", error);
+  }
+  return projects;
 }
 
 /**
@@ -90,9 +90,9 @@ export function getLocalProjects() {
  * @returns {string} Storage key used
  */
 export function saveLocalProject(project) {
-	const projectId = `${STORAGE_KEYS.PROJECT_PREFIX}-${Date.now()}`;
-	setStorageItem(projectId, project);
-	return projectId;
+  const projectId = `${STORAGE_KEYS.PROJECT_PREFIX}-${Date.now()}`;
+  setStorageItem(projectId, project);
+  return projectId;
 }
 
 /**
@@ -100,7 +100,7 @@ export function saveLocalProject(project) {
  * @param {Object} files - Files object
  */
 export function saveTempFiles(files) {
-	setStorageItem(STORAGE_KEYS.TEMP_PROJECT, { files });
+  setStorageItem(STORAGE_KEYS.TEMP_PROJECT, { files });
 }
 
 /**
@@ -108,8 +108,8 @@ export function saveTempFiles(files) {
  * @returns {Object|null} Files object or null
  */
 export function getTempFiles() {
-	const temp = getStorageItem(STORAGE_KEYS.TEMP_PROJECT);
-	return temp?.files || null;
+  const temp = getStorageItem(STORAGE_KEYS.TEMP_PROJECT);
+  return temp?.files || null;
 }
 
 /**
@@ -117,7 +117,7 @@ export function getTempFiles() {
  * @returns {string} Theme name (dark or light)
  */
 export function getTheme() {
-	return localStorage.getItem(STORAGE_KEYS.THEME) || 'dark';
+  return localStorage.getItem(STORAGE_KEYS.THEME) || "dark";
 }
 
 /**
@@ -125,7 +125,7 @@ export function getTheme() {
  * @param {string} theme - Theme name
  */
 export function setTheme(theme) {
-	localStorage.setItem(STORAGE_KEYS.THEME, theme);
+  localStorage.setItem(STORAGE_KEYS.THEME, theme);
 }
 
 export { STORAGE_KEYS };

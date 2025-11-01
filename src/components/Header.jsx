@@ -1,8 +1,8 @@
-'use client';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import useAuthStore from '@/stores/authStore';
-import { ROUTES } from '@/constants';
+"use client";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import useAuthStore from "@/stores/authStore";
+import { ROUTES } from "@/constants";
 
 export default function Header() {
   const router = useRouter();
@@ -18,11 +18,11 @@ export default function Header() {
   return (
     <header
       className="fixed top-0 left-0 right-0 z-50 p-3 flex items-center justify-between shadow"
-      style={{ background: 'var(--card)', color: 'var(--card-foreground)' }}
+      style={{ background: "var(--card)", color: "var(--card-foreground)" }}
     >
       <div className="flex items-center gap-4">
         <Link href="/" className="font-bold text-lg">
-          CipherStudio
+          codestudio
         </Link>
         <nav className="flex gap-3 text-sm ml-4">
           <Link href="/projects" className="hidden md:inline">
@@ -43,7 +43,10 @@ export default function Header() {
           </>
         ) : (
           <div className="flex items-center gap-2">
-            <Link href="/signin" className="text-sm px-2 py-1 border rounded hover:bg-secondary transition-colors">
+            <Link
+              href="/signin"
+              className="text-sm px-2 py-1 border rounded hover:bg-secondary transition-colors"
+            >
               Sign in
             </Link>
             <Link

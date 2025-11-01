@@ -6,7 +6,7 @@ export default function ProjectLayout({ children }) {
   return (
     <div
       className="min-h-screen w-full"
-      style={{ background: 'var(--background)', color: 'var(--foreground)' }}
+      style={{ background: "var(--background)", color: "var(--foreground)" }}
     >
       {children}
     </div>

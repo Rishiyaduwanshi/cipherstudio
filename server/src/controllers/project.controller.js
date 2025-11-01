@@ -1,6 +1,6 @@
-import Project from '../models/project.model.js';
-import appResponse from '../utils/appResponse.js';
-import { AppError, NotFoundError } from '../utils/appError.js';
+import Project from "../models/project.model.js";
+import appResponse from "../utils/appResponse.js";
+import { AppError, NotFoundError } from "../utils/appError.js";
 
 export const getUserProjects = async (req, res, next) => {
   try {
@@ -9,7 +9,7 @@ export const getUserProjects = async (req, res, next) => {
 
     appResponse(res, {
       statusCode: 200,
-      message: 'Projects fetched successfully',
+      message: "Projects fetched successfully",
       data: { projects },
     });
   } catch (err) {
@@ -20,14 +20,14 @@ export const getUserProjects = async (req, res, next) => {
 export const getProjectById = async (req, res, next) => {
   try {
     const project = await Project.findById(req.params.id);
-    if (!project) throw new NotFoundError('Project not found');
+    if (!project) throw new NotFoundError("Project not found");
 
-      if (project.userId.toString() !== req.user._id.toString())
-      throw new AppError({ statusCode: 403, message: 'Forbidden' });
+    if (project.userId.toString() !== req.user._id.toString())
+      throw new AppError({ statusCode: 403, message: "Forbidden" });
 
     appResponse(res, {
       statusCode: 200,
-      message: 'Project fetched successfully',
+      message: "Project fetched successfully",
       data: { project },
     });
   } catch (err) {
@@ -39,23 +39,29 @@ export const createProject = async (req, res, next) => {
   try {
     console.log("Headers:", req.headers);
     console.log("Raw Body:", req.body);
-    console.log("Content-Type:", req.headers['content-type']);
-    
+    console.log("Content-Type:", req.headers["content-type"]);
+
     if (!req.body || Object.keys(req.body).length === 0) {
-      throw new AppError({ 
-        statusCode: 400, 
-        message: 'Request body is empty. Ensure you\'re sending JSON with Content-Type: application/json' 
+      throw new AppError({
+        statusCode: 400,
+        message:
+          "Request body is empty. Ensure you're sending JSON with Content-Type: application/json",
       });
     }
 
     const userId = req.user._id;
-    let { name, files = {}, description = '', visibility = 'private', settings = {} } = req.body;
-
+    let {
+      name,
+      files = {},
+      description = "",
+      visibility = "private",
+      settings = {},
+    } = req.body;
 
     if (!name) {
       throw new AppError({
         statusCode: 400,
-        message: 'Project name is required'
+        message: "Project name is required",
       });
     }
 
@@ -66,9 +72,9 @@ export const createProject = async (req, res, next) => {
       description,
       visibility,
       settings: {
-        framework: settings.framework || 'react',
-        autoSave: settings.autoSave ?? true
-      }
+        framework: settings.framework || "react",
+        autoSave: settings.autoSave ?? true,
+      },
     };
 
     console.log("Creating project with data:", projectData);
@@ -77,7 +83,7 @@ export const createProject = async (req, res, next) => {
 
     appResponse(res, {
       statusCode: 201,
-      message: 'Project created successfully',
+      message: "Project created successfully",
       data: { project },
     });
   } catch (err) {
@@ -88,10 +94,10 @@ export const createProject = async (req, res, next) => {
 export const updateProject = async (req, res, next) => {
   try {
     const project = await Project.findById(req.params.id);
-    if (!project) throw new NotFoundError('Project not found');
+    if (!project) throw new NotFoundError("Project not found");
 
     if (project.userId.toString() !== req.user._id)
-      throw new AppError({ statusCode: 403, message: 'Forbidden' });
+      throw new AppError({ statusCode: 403, message: "Forbidden" });
 
     const { name, files, description, visibility, settings } = req.body;
     if (name !== undefined) project.name = name;
@@ -104,7 +110,7 @@ export const updateProject = async (req, res, next) => {
 
     appResponse(res, {
       statusCode: 200,
-      message: 'Project updated successfully',
+      message: "Project updated successfully",
       data: { project },
     });
   } catch (error) {
@@ -115,16 +121,16 @@ export const updateProject = async (req, res, next) => {
 export const deleteProject = async (req, res, next) => {
   try {
     const project = await Project.findById(req.params.id);
-    if (!project) throw new NotFoundError('Project not found');
+    if (!project) throw new NotFoundError("Project not found");
 
     if (project.userId.toString() !== req.user._id.toString())
-      throw new AppError({ statusCode: 403, message: 'Forbidden' });
+      throw new AppError({ statusCode: 403, message: "Forbidden" });
 
     await project.deleteOne();
 
     appResponse(res, {
       statusCode: 200,
-      message: 'Project deleted successfully',
+      message: "Project deleted successfully",
       data: [],
     });
   } catch (err) {

@@ -9,8 +9,8 @@
  * @returns {boolean} True if folder
  */
 export function isFolder(path) {
-	if (!path) return false;
-	return !/\.[\w\d]+$/.test(path);
+  if (!path) return false;
+  return !/\.[\w\d]+$/.test(path);
 }
 
 /**
@@ -19,8 +19,8 @@ export function isFolder(path) {
  * @returns {string} Cleaned path
  */
 export function cleanPath(path) {
-	if (!path) return '';
-	return path.startsWith('/') ? path.slice(1) : path;
+  if (!path) return "";
+  return path.startsWith("/") ? path.slice(1) : path;
 }
 
 /**
@@ -29,8 +29,8 @@ export function cleanPath(path) {
  * @returns {string} Normalized path
  */
 export function normalizePath(path) {
-	if (!path) return '';
-	return path.replace(/\/+/g, '/');
+  if (!path) return "";
+  return path.replace(/\/+/g, "/");
 }
 
 /**
@@ -39,9 +39,9 @@ export function normalizePath(path) {
  * @returns {string} Parent directory path
  */
 export function getParentPath(path) {
-	if (!path) return '/';
-	const lastSlash = path.lastIndexOf('/');
-	return lastSlash === 0 ? '/' : path.slice(0, lastSlash);
+  if (!path) return "/";
+  const lastSlash = path.lastIndexOf("/");
+  return lastSlash === 0 ? "/" : path.slice(0, lastSlash);
 }
 
 /**
@@ -50,7 +50,7 @@ export function getParentPath(path) {
  * @returns {string} Joined and normalized path
  */
 export function joinPath(...segments) {
-	return normalizePath(segments.filter(Boolean).join('/'));
+  return normalizePath(segments.filter(Boolean).join("/"));
 }
 
 /**
@@ -60,9 +60,9 @@ export function joinPath(...segments) {
  * @returns {boolean} True if path starts with prefix
  */
 export function pathStartsWith(path, prefix) {
-	if (!path || !prefix) return false;
-	const normalizedPrefix = prefix.endsWith('/') ? prefix : `${prefix}/`;
-	return path === prefix || path.startsWith(normalizedPrefix);
+  if (!path || !prefix) return false;
+  const normalizedPrefix = prefix.endsWith("/") ? prefix : `${prefix}/`;
+  return path === prefix || path.startsWith(normalizedPrefix);
 }
 
 /**
@@ -72,11 +72,11 @@ export function pathStartsWith(path, prefix) {
  * @returns {Array} Array of file paths
  */
 export function getChildFiles(files, folderPath) {
-	if (!files || !folderPath) return [];
-	const prefix = folderPath.endsWith('/') ? folderPath : `${folderPath}/`;
-	return Object.keys(files).filter(
-		(k) => k === folderPath || k.startsWith(prefix)
-	);
+  if (!files || !folderPath) return [];
+  const prefix = folderPath.endsWith("/") ? folderPath : `${folderPath}/`;
+  return Object.keys(files).filter(
+    (k) => k === folderPath || k.startsWith(prefix),
+  );
 }
 
 /**
@@ -86,10 +86,10 @@ export function getChildFiles(files, folderPath) {
  * @returns {string} New full path
  */
 export function renamePath(oldPath, newName) {
-	const parent = getParentPath(oldPath);
-	if (parent === '/') {
-		// For root level files/folders, ensure leading slash
-		return '/' + newName;
-	}
-	return joinPath(parent, newName);
+  const parent = getParentPath(oldPath);
+  if (parent === "/") {
+    // For root level files/folders, ensure leading slash
+    return "/" + newName;
+  }
+  return joinPath(parent, newName);
 }

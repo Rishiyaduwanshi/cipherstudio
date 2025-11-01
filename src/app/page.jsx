@@ -1,9 +1,9 @@
- 'use client';
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import Image from 'next/image';
-import useAuthStore from '@/stores/authStore';
-import { ROUTES, APP_CONFIG, UI } from '@/constants';
+"use client";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import Image from "next/image";
+import useAuthStore from "@/stores/authStore";
+import { ROUTES, APP_CONFIG, UI } from "@/constants";
 
 export default function Home() {
   const router = useRouter();
@@ -32,7 +32,8 @@ export default function Home() {
             Welcome to {APP_CONFIG.APP_NAME}
           </h1>
           <p className="text-xl md:text-2xl text-gray-300 mb-8 max-w-3xl mx-auto">
-            An online React IDE. Write, edit, and preview your code in real-time.
+            An online React IDE. Write, edit, and preview your code in
+            real-time.
           </p>
           <button
             onClick={handleGetStarted}
@@ -47,7 +48,9 @@ export default function Home() {
 
         {/* IDE Screenshot - First Thing User Sees */}
         <div className="bg-slate-800/30 backdrop-blur-sm rounded-xl p-8 border border-slate-700 mb-16">
-          <h2 className="text-3xl font-bold mb-4 text-center">Full-Featured IDE</h2>
+          <h2 className="text-3xl font-bold mb-4 text-center">
+            Full-Featured IDE
+          </h2>
           <p className="text-gray-400 text-center mb-8 max-w-2xl mx-auto">
             Code editor with file explorer and live preview
           </p>
@@ -68,12 +71,16 @@ export default function Home() {
           <div className="bg-slate-800/50 backdrop-blur-sm p-6 rounded-lg border border-slate-700">
             <div className="text-4xl mb-4">💻</div>
             <h3 className="text-xl font-semibold mb-2">Code Editor</h3>
-            <p className="text-gray-400">VS Code-like editing experience with syntax highlighting</p>
+            <p className="text-gray-400">
+              VS Code-like editing experience with syntax highlighting
+            </p>
           </div>
           <div className="bg-slate-800/50 backdrop-blur-sm p-6 rounded-lg border border-slate-700">
             <div className="text-4xl mb-4">👁️</div>
             <h3 className="text-xl font-semibold mb-2">Live Preview</h3>
-            <p className="text-gray-400">See your changes in real-time as you code</p>
+            <p className="text-gray-400">
+              See your changes in real-time as you code
+            </p>
           </div>
         </div>
 
@@ -81,7 +88,9 @@ export default function Home() {
         <div className="space-y-16">
           {/* Projects Screenshot */}
           <div className="bg-slate-800/30 backdrop-blur-sm rounded-xl p-8 border border-slate-700">
-            <h2 className="text-3xl font-bold mb-4 text-center">Your Projects Dashboard</h2>
+            <h2 className="text-3xl font-bold mb-4 text-center">
+              Your Projects Dashboard
+            </h2>
             <p className="text-gray-400 text-center mb-8 max-w-2xl mx-auto">
               All your projects in one place
             </p>
@@ -100,7 +109,9 @@ export default function Home() {
         {/* CTA Section */}
         <div className="text-center mt-16 py-12">
           <h2 className="text-3xl font-bold mb-4">Ready to start coding?</h2>
-          <p className="text-gray-400 mb-8">Sign up now and create your first project!</p>
+          <p className="text-gray-400 mb-8">
+            Sign up now and create your first project!
+          </p>
           <button
             onClick={handleGetStarted}
             className={`${UI.BUTTON_PRIMARY} text-lg px-8 py-4 rounded-lg font-semibold transition-transform hover:scale-105`}

@@ -1,18 +1,17 @@
-﻿import { NextResponse } from 'next/server';
+﻿import { NextResponse } from "next/server";
 
-const publicPaths = new Set([
-  '/',
-  '/favicon.ico'
-]);
+const publicPaths = new Set(["/", "/favicon.ico"]);
 
 export function middleware(request) {
   const { pathname } = request.nextUrl;
-  console.log('Middleware - Checking path:', pathname);
+  console.log("Middleware - Checking path:", pathname);
 
   // Skip middleware for public paths and static files
-  if (publicPaths.has(pathname) || 
-      pathname.startsWith('/_next/') || 
-      pathname.endsWith('.ico')) {
+  if (
+    publicPaths.has(pathname) ||
+    pathname.startsWith("/_next/") ||
+    pathname.endsWith(".ico")
+  ) {
     return NextResponse.next();
   }
 
@@ -20,7 +19,5 @@ export function middleware(request) {
 }
 
 export const config = {
-  matcher: [
-    '/((?!_next/static|_next/image|assets|favicon.ico).*)',
-  ]
+  matcher: ["/((?!_next/static|_next/image|assets|favicon.ico).*)"],
 };

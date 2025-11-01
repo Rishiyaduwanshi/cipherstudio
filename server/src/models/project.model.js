@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
 const projectSchema = new mongoose.Schema(
   {
@@ -9,12 +9,12 @@ const projectSchema = new mongoose.Schema(
     },
     userId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
+      ref: "User",
       required: true,
     },
     description: {
       type: String,
-      default: '',
+      default: "",
       trim: true,
     },
     files: {
@@ -24,14 +24,14 @@ const projectSchema = new mongoose.Schema(
     },
     visibility: {
       type: String,
-      enum: ['public', 'private'],
-      default: 'private',
+      enum: ["public", "private"],
+      default: "private",
     },
     settings: {
       framework: {
         type: String,
-        enum: ['react', 'vue', 'vanilla', 'node'],
-        default: 'react',
+        enum: ["react", "vue", "vanilla", "node"],
+        default: "react",
       },
       autoSave: {
         type: Boolean,
@@ -40,9 +40,9 @@ const projectSchema = new mongoose.Schema(
     },
   },
   {
-    timestamps: true, 
-  }
+    timestamps: true,
+  },
 );
 
-const Project = mongoose.model('Project', projectSchema);
+const Project = mongoose.model("Project", projectSchema);
 export default Project;

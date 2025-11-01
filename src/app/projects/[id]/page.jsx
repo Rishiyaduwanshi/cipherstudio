@@ -1,13 +1,13 @@
-'use client';
-import React, { useEffect, useState, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
-import IDE from '@/components/IDE';
-import ProjectManager from '@/components/ProjectManager';
-import useProjectStore from '@/stores/projectStore';
-import { initialFiles as demoInitialFiles } from '@/data/initialProject-react';
-import { getTempFiles } from '@/utils/storage';
-import { normalizeFiles } from '@/utils/fileHelpers';
-import { HTTP_STATUS, ROUTES } from '@/constants';
+"use client";
+import React, { useEffect, useState, useCallback } from "react";
+import { useRouter } from "next/navigation";
+import IDE from "@/components/IDE";
+import ProjectManager from "@/components/ProjectManager";
+import useProjectStore from "@/stores/projectStore";
+import { initialFiles as demoInitialFiles } from "@/data/initialProject-react";
+import { getTempFiles } from "@/utils/storage";
+import { normalizeFiles } from "@/utils/fileHelpers";
+import { HTTP_STATUS, ROUTES } from "@/constants";
 
 export default function EditorPage({ params }) {
   const router = useRouter();
@@ -19,7 +19,8 @@ export default function EditorPage({ params }) {
   const [errorDetails, setErrorDetails] = useState(null);
   const [unauthenticated, setUnauthenticated] = useState(false);
 
-  const resolvedParams = typeof React.use === 'function' ? React.use(params) : params;
+  const resolvedParams =
+    typeof React.use === "function" ? React.use(params) : params;
   const id = resolvedParams?.id;
 
   useEffect(() => {
@@ -29,10 +30,14 @@ export default function EditorPage({ params }) {
         const proj = await fetchProjectById(id);
         const normalized = { ...(proj || {}) };
         normalized.files = normalizeFiles(proj?.files);
-        console.info('Loaded project; files normalized ->', Object.keys(normalized.files || {}).length, 'files');
+        console.info(
+          "Loaded project; files normalized ->",
+          Object.keys(normalized.files || {}).length,
+          "files",
+        );
         setProject(normalized);
       } catch (err) {
-        console.error('Error fetching project:', err);
+        console.error("Error fetching project:", err);
         setErrorDetails(err?.response?.data || err);
         if (
           (err && err.statusCode === HTTP_STATUS.UNAUTHORIZED) ||
@@ -40,7 +45,7 @@ export default function EditorPage({ params }) {
           err?.response?.status === HTTP_STATUS.UNAUTHORIZED
         ) {
           console.warn(
-            'Project fetch returned 401 — unauthenticated. Showing sign-in/demo options.'
+            "Project fetch returned 401 — unauthenticated. Showing sign-in/demo options.",
           );
           setUnauthenticated(true);
           setLoading(false);
@@ -49,37 +54,35 @@ export default function EditorPage({ params }) {
 
         const msg =
           (err &&
-            (err.message || err?.data?.message || 'Failed to load project')) ||
-          'Failed to load project';
+            (err.message || err?.data?.message || "Failed to load project")) ||
+          "Failed to load project";
         if (
-          (err && (err.statusCode === HTTP_STATUS.NOT_FOUND || err.status === HTTP_STATUS.NOT_FOUND)) ||
+          (err &&
+            (err.statusCode === HTTP_STATUS.NOT_FOUND ||
+              err.status === HTTP_STATUS.NOT_FOUND)) ||
           /route not found/i.test(String(msg))
         ) {
-          
           try {
             const tempFiles = getTempFiles();
             if (tempFiles) {
               setProject({ files: tempFiles });
               setError(
-                'Project not found on server — loaded local temp project'
+                "Project not found on server — loaded local temp project",
               );
               return;
             }
-          } catch (e) {
-            
-          }
+          } catch (e) {}
 
-          
           setProject({
-            name: 'Demo (fallback)',
+            name: "Demo (fallback)",
             files: demoInitialFiles,
-            description: 'Fallback demo project',
+            description: "Fallback demo project",
           });
-          setError('Project not found on server — showing demo fallback');
+          setError("Project not found on server — showing demo fallback");
           setErrorDetails(err?.response?.data || err);
           return;
         }
-        setError(msg || 'Failed to load project');
+        setError(msg || "Failed to load project");
         setErrorDetails(err?.response?.data || err);
       } finally {
         setLoading(false);
@@ -89,17 +92,14 @@ export default function EditorPage({ params }) {
     loadProject();
   }, [id, fetchProjectById, router]);
 
-  
-  
   const handleFilesChange = useCallback(
     (files) => {
       setProject((prev) => {
-        
         if (prev && prev.files === files) return prev;
         return { ...(prev || {}), files };
       });
     },
-    [setProject]
+    [setProject],
   );
 
   if (loading) {
@@ -124,9 +124,9 @@ export default function EditorPage({ params }) {
             <button
               onClick={() => {
                 setProject({
-                  name: 'Demo (fallback)',
+                  name: "Demo (fallback)",
                   files: demoInitialFiles,
-                  description: 'Local demo',
+                  description: "Local demo",
                 });
                 setError(null);
                 setErrorDetails(null);
@@ -153,9 +153,9 @@ export default function EditorPage({ params }) {
       <div
         className="border-b p-3 pt-4"
         style={{
-          background: 'var(--card)',
-          borderColor: 'var(--border)',
-          color: 'var(--card-foreground)',
+          background: "var(--card)",
+          borderColor: "var(--border)",
+          color: "var(--card-foreground)",
         }}
       >
         <div className="pt-1">

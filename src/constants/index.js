@@ -1,15 +1,14 @@
-
 // App Configuration
 export const APP_CONFIG = Object.freeze({
-  APP_NAME: process.env.NEXT_PUBLIC_APP_NAME || 'CipherStudio',
-  APP_VERSION: process.env.NEXT_PUBLIC_APP_VERSION || '1.0.0',
-  DEFAULT_THEME: 'dark',
+  APP_NAME: process.env.NEXT_PUBLIC_APP_NAME || "codestudio",
+  APP_VERSION: process.env.NEXT_PUBLIC_APP_VERSION || "1.0.0",
+  DEFAULT_THEME: "dark",
 });
 
 // API Configuration
 export const API_CONFIG = Object.freeze({
-  BASE_URL: process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000',
-  API_VERSION: 'v1',
+  BASE_URL: process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000",
+  API_VERSION: "v1",
   TIMEOUT: 45000,
   SERVER_SELECTION_TIMEOUT: 5000,
 });
@@ -27,10 +26,10 @@ export const HTTP_STATUS = Object.freeze({
 
 // Route Paths
 export const ROUTES = Object.freeze({
-  HOME: '/',
-  SIGNIN: '/signin',
-  SIGNUP: '/signup',
-  PROJECTS: '/projects',
+  HOME: "/",
+  SIGNIN: "/signin",
+  SIGNUP: "/signup",
+  PROJECTS: "/projects",
   PROJECT_DETAIL: (id) => `/projects/${id}`,
 });
 
@@ -48,13 +47,15 @@ export const VALIDATION = Object.freeze({
 
 // UI Constants - Using custom CSS variables for consistency
 export const UI = Object.freeze({
-  SPINNER_CLASS: 'animate-spin rounded-full h-12 w-12 border-4 border-primary border-t-transparent',
-  MINI_SPINNER_CLASS: 'animate-spin rounded-full h-8 w-8 border-b-2 border-primary',
-  VIEWPORT_HEIGHT: 'calc(100vh-4rem)',
-  BUTTON_PRIMARY: 'px-6 py-3 bg-primary text-white rounded-md hover:bg-primary-hover transition-colors',
-  BUTTON_DANGER: 'p-2 text-destructive hover:opacity-80 transition-opacity',
+  SPINNER_CLASS:
+    "animate-spin rounded-full h-12 w-12 border-4 border-primary border-t-transparent",
+  MINI_SPINNER_CLASS:
+    "animate-spin rounded-full h-8 w-8 border-b-2 border-primary",
+  VIEWPORT_HEIGHT: "calc(100vh-4rem)",
+  BUTTON_PRIMARY:
+    "px-6 py-3 bg-primary text-white rounded-md hover:bg-primary-hover transition-colors",
+  BUTTON_DANGER: "p-2 text-destructive hover:opacity-80 transition-opacity",
 });
 
 // Default export for backward compatibility
 export default APP_CONFIG;
-

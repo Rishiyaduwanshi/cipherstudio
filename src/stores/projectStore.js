@@ -1,7 +1,7 @@
-import { create } from 'zustand';
-import { toast } from 'react-toastify';
-import * as projectAPI from '../services/projectAPI';
-import { HTTP_STATUS, ROUTES } from '@/constants';
+import { create } from "zustand";
+import { toast } from "react-toastify";
+import * as projectAPI from "../services/projectAPI";
+import { HTTP_STATUS, ROUTES } from "@/constants";
 
 const useProjectStore = create((set) => ({
   projects: [],
@@ -20,7 +20,7 @@ const useProjectStore = create((set) => ({
         window.location.href = ROUTES.SIGNIN;
         return;
       }
-      toast.error(error.message || 'Failed to load projects');
+      toast.error(error.message || "Failed to load projects");
       throw error;
     }
   },
@@ -29,9 +29,9 @@ const useProjectStore = create((set) => ({
     set({ loading: true });
     try {
       const created = await projectAPI.createProject(projectData);
-      set((state) => ({ 
-        projects: [...state.projects, created], 
-        loading: false 
+      set((state) => ({
+        projects: [...state.projects, created],
+        loading: false,
       }));
       return created;
     } catch (error) {
@@ -57,7 +57,7 @@ const useProjectStore = create((set) => ({
         return;
       }
       if (error.status === HTTP_STATUS.NOT_FOUND) {
-        toast.error('Project not found');
+        toast.error("Project not found");
         return null;
       }
       throw error;
@@ -69,8 +69,13 @@ const useProjectStore = create((set) => ({
     try {
       const updated = await projectAPI.updateProject(projectId, updates);
       set((state) => ({
-        projects: state.projects.map((p) => (p._id === updated._id ? updated : p)),
-        currentProject: state.currentProject && state.currentProject._id === updated._id ? updated : state.currentProject,
+        projects: state.projects.map((p) =>
+          p._id === updated._id ? updated : p,
+        ),
+        currentProject:
+          state.currentProject && state.currentProject._id === updated._id
+            ? updated
+            : state.currentProject,
         loading: false,
       }));
       return updated;
@@ -90,7 +95,10 @@ const useProjectStore = create((set) => ({
       await projectAPI.deleteProject(projectId);
       set((state) => ({
         projects: state.projects.filter((p) => p._id !== projectId),
-        currentProject: state.currentProject && state.currentProject._id === projectId ? null : state.currentProject,
+        currentProject:
+          state.currentProject && state.currentProject._id === projectId
+            ? null
+            : state.currentProject,
         loading: false,
       }));
     } catch (error) {

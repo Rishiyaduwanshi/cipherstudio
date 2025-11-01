@@ -1,12 +1,12 @@
-'use client';
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import useAuthStore from '@/stores/authStore';
-import useProjectStore from '@/stores/projectStore';
-import { toast } from 'react-toastify';
-import { FiTrash2, FiEdit3, FiPlus, FiGlobe, FiLock } from 'react-icons/fi';
-import CreateProjectModal from '@/components/CreateProjectModal';
-import { ROUTES, UI } from '@/constants';
+"use client";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import useAuthStore from "@/stores/authStore";
+import useProjectStore from "@/stores/projectStore";
+import { toast } from "react-toastify";
+import { FiTrash2, FiEdit3, FiPlus, FiGlobe, FiLock } from "react-icons/fi";
+import CreateProjectModal from "@/components/CreateProjectModal";
+import { ROUTES, UI } from "@/constants";
 
 export default function ProjectsPage() {
   const router = useRouter();
@@ -19,22 +19,22 @@ export default function ProjectsPage() {
       router.push(ROUTES.SIGNIN);
       return;
     }
-    
+
     // Load projects when authenticated
-    fetchProjects().catch(err => 
-      toast.error(err.message || 'Failed to load projects')
+    fetchProjects().catch((err) =>
+      toast.error(err.message || "Failed to load projects"),
     );
   }, [isAuthenticated, router, fetchProjects]);
 
   const handleDeleteProject = async (projectId) => {
-    if (!confirm('Are you sure you want to delete this project?')) return;
-    
+    if (!confirm("Are you sure you want to delete this project?")) return;
+
     try {
       await deleteProject(projectId);
-      toast.success('Project deleted successfully');
-      fetchProjects(); 
+      toast.success("Project deleted successfully");
+      fetchProjects();
     } catch (error) {
-      toast.error(error.message || 'Failed to delete project');
+      toast.error(error.message || "Failed to delete project");
     }
   };
 
@@ -56,7 +56,7 @@ export default function ProjectsPage() {
           <FiPlus /> New Project
         </button>
       </div>
-      
+
       {/* Projects Grid */}
       {loading ? (
         <div className="flex justify-center items-center h-64">
@@ -64,16 +64,23 @@ export default function ProjectsPage() {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {projects.map(project => (
-            <div key={project._id} className="bg-gray-800 rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow">
+          {projects.map((project) => (
+            <div
+              key={project._id}
+              className="bg-gray-800 rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow"
+            >
               <div className="p-6">
                 <div className="flex items-start justify-between mb-4">
                   <div>
-                    <h3 className="text-xl font-semibold text-white mb-2">{project.name}</h3>
-                    <p className="text-gray-400 text-sm line-clamp-2">{project.description || 'No description'}</p>
+                    <h3 className="text-xl font-semibold text-white mb-2">
+                      {project.name}
+                    </h3>
+                    <p className="text-gray-400 text-sm line-clamp-2">
+                      {project.description || "No description"}
+                    </p>
                   </div>
                   <div className="flex items-center gap-2">
-                    {project.visibility === 'public' ? (
+                    {project.visibility === "public" ? (
                       <FiGlobe className="text-info" title="Public" />
                     ) : (
                       <FiLock className="text-gray-400" title="Private" />
@@ -82,7 +89,8 @@ export default function ProjectsPage() {
                 </div>
 
                 <div className="text-sm text-gray-400 mb-4">
-                  Last updated: {new Date(project.updatedAt).toLocaleDateString()}
+                  Last updated:{" "}
+                  {new Date(project.updatedAt).toLocaleDateString()}
                 </div>
 
                 <div className="flex justify-between items-center">
@@ -119,7 +127,7 @@ export default function ProjectsPage() {
       )}
 
       {/* Create Project Modal */}
-      <CreateProjectModal 
+      <CreateProjectModal
         isOpen={showCreateModal}
         onClose={() => setShowCreateModal(false)}
         onSuccess={() => {

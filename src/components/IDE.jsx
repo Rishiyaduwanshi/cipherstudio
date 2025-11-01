@@ -1,12 +1,17 @@
-'use client';
-import { useState, useEffect, useRef } from 'react';
-import { toast } from 'react-toastify';
-import TreeFileExplorer from './TreeFileExplorer';
-import CodeEditor from './CodeEditor';
-import LivePreview from './LivePreview';
-import { saveTempFiles } from '@/utils/storage';
-import { getLanguage } from '@/utils/fileHelpers';
-import { isFolder, joinPath, getChildFiles, renamePath } from '@/utils/pathHelpers';
+"use client";
+import { useState, useEffect, useRef } from "react";
+import { toast } from "react-toastify";
+import TreeFileExplorer from "./TreeFileExplorer";
+import CodeEditor from "./CodeEditor";
+import LivePreview from "./LivePreview";
+import { saveTempFiles } from "@/utils/storage";
+import { getLanguage } from "@/utils/fileHelpers";
+import {
+  isFolder,
+  joinPath,
+  getChildFiles,
+  renamePath,
+} from "@/utils/pathHelpers";
 
 export default function IDE({
   initialFiles = {},
@@ -23,10 +28,10 @@ export default function IDE({
       : legacyFiles || {};
   const [files, setFiles] = useState(startingFiles || {});
   const [activeFile, setActiveFile] = useState(
-    Object.keys(startingFiles || {})[0] || null
+    Object.keys(startingFiles || {})[0] || null,
   );
   const [openTabs, setOpenTabs] = useState(() =>
-    Object.keys(startingFiles || {}).slice(0, 3)
+    Object.keys(startingFiles || {}).slice(0, 3),
   );
   const [dirtyFiles, setDirtyFiles] = useState({});
 
@@ -44,7 +49,6 @@ export default function IDE({
       setActiveFile(keys[0] || null);
   }, [files, activeFile]);
 
-
   const applyingInitialRef = useRef(false);
   useEffect(() => {
     if (!projectId) return;
@@ -61,9 +65,8 @@ export default function IDE({
     }
   }, [initialFiles, projectId]);
 
-
   useEffect(() => {
-    if (typeof onFilesChange === 'function') {
+    if (typeof onFilesChange === "function") {
       if (applyingInitialRef.current) return;
       onFilesChange(files);
     }
@@ -82,18 +85,18 @@ export default function IDE({
       ...files,
       [activeFile]: { ...files[activeFile], code: newCode },
     };
-    
+
     setFiles(updatedFiles);
-    
+
     if (project && setProject) {
-      setProject(prevProject => ({
+      setProject((prevProject) => ({
         ...prevProject,
-        files: updatedFiles
+        files: updatedFiles,
       }));
     }
-    
+
     saveTempFiles(updatedFiles);
-    
+
     setDirtyFiles((prev) => ({ ...prev, [activeFile]: true }));
   };
 
@@ -102,9 +105,7 @@ export default function IDE({
     setCursorPos({ lineNumber: pos.lineNumber || 1, column: pos.column || 1 });
   };
 
-
-
-  const handleAddFile = (filePath, content = '') => {
+  const handleAddFile = (filePath, content = "") => {
     setFiles((prev) => {
       const updated = { ...prev, [filePath]: { code: content } };
       saveTempFiles(updated);
@@ -112,7 +113,7 @@ export default function IDE({
     });
     setActiveFile(filePath);
     setOpenTabs((prev) =>
-      prev.includes(filePath) ? prev : [...prev, filePath]
+      prev.includes(filePath) ? prev : [...prev, filePath],
     );
     setDirtyFiles((prev) => ({ ...prev, [filePath]: false }));
     if (project && setProject) {
@@ -127,21 +128,21 @@ export default function IDE({
     setFiles((prev) => {
       const copy = { ...prev };
       const isFolderPath = isFolder(filePath);
-      
+
       if (isFolderPath) {
         getChildFiles(copy, filePath).forEach((k) => delete copy[k]);
       } else {
         delete copy[filePath];
       }
-      
+
       saveTempFiles(copy);
       return copy;
     });
-    
+
     setOpenTabs((prev) =>
-      prev.filter((t) => !(t === filePath || t.startsWith(`${filePath}/`)))
+      prev.filter((t) => !(t === filePath || t.startsWith(`${filePath}/`))),
     );
-    
+
     setDirtyFiles((prev) => {
       const p = { ...prev };
       delete p[filePath];
@@ -150,23 +151,23 @@ export default function IDE({
       });
       return p;
     });
-    
+
     setFiles((prev) => {
       if (activeFile === filePath || activeFile?.startsWith(`${filePath}/`)) {
         const remaining = Object.keys(prev).filter(
-          (k) => !(k === filePath || k.startsWith(`${filePath}/`))
+          (k) => !(k === filePath || k.startsWith(`${filePath}/`)),
         );
         setActiveFile(remaining[0] || null);
       }
       return prev;
     });
-    
+
     if (project && setProject) {
       setProject((prev) => {
         if (!prev) return prev;
         const copy = { ...(prev.files || {}) };
         const isFolderPath = isFolder(filePath);
-        
+
         if (isFolderPath) {
           getChildFiles(copy, filePath).forEach((k) => delete copy[k]);
         } else {
@@ -177,9 +178,13 @@ export default function IDE({
     }
   };
 
-  const handleAddFolder = (folderName, parentPath = '/') => {
-    const indexFile = joinPath(parentPath === '/' ? '' : parentPath, folderName, 'index.js');
-    handleAddFile(indexFile, '// Folder created\n');
+  const handleAddFolder = (folderName, parentPath = "/") => {
+    const indexFile = joinPath(
+      parentPath === "/" ? "" : parentPath,
+      folderName,
+      "index.js",
+    );
+    handleAddFile(indexFile, "// Folder created\n");
   };
 
   const handleRenameFile = (oldPath, newName) => {
@@ -190,13 +195,13 @@ export default function IDE({
     // check collisions
     if (isFolderPath) {
       const collides = Object.keys(files || {}).some(
-        (k) => k === newBase || k.startsWith(`${newBase}/`)
+        (k) => k === newBase || k.startsWith(`${newBase}/`),
       );
       if (collides) return;
-      
+
       setFiles((prev) => {
         const copy = { ...prev };
-        const prefix = oldPath.endsWith('/') ? oldPath : `${oldPath}/`;
+        const prefix = oldPath.endsWith("/") ? oldPath : `${oldPath}/`;
         Object.keys(prev).forEach((k) => {
           if (k === oldPath || k.startsWith(prefix)) {
             const rest = k.slice(prefix.length);
@@ -208,25 +213,25 @@ export default function IDE({
         saveTempFiles(copy);
         return copy;
       });
-      
+
       setOpenTabs((prev) =>
         prev.map((t) =>
           t === oldPath || t.startsWith(`${oldPath}/`)
             ? t.replace(oldPath, newBase)
-            : t
-        )
+            : t,
+        ),
       );
       setActiveFile((prev) =>
         prev && (prev === oldPath || prev.startsWith(`${oldPath}/`))
           ? prev.replace(oldPath, newBase)
-          : prev
+          : prev,
       );
-      
+
       if (project && setProject) {
         setProject((prev) => {
           if (!prev) return prev;
           const copy = { ...(prev.files || {}) };
-          const prefix = oldPath.endsWith('/') ? oldPath : `${oldPath}/`;
+          const prefix = oldPath.endsWith("/") ? oldPath : `${oldPath}/`;
           Object.keys(prev.files || {}).forEach((k) => {
             if (k === oldPath || k.startsWith(prefix)) {
               const rest = k.slice(prefix.length);
@@ -241,7 +246,7 @@ export default function IDE({
     } else {
       if (newBase === oldPath) return;
       if (files[newBase]) return;
-      
+
       setFiles((prev) => {
         const copy = { ...prev };
         copy[newBase] = copy[oldPath];
@@ -249,10 +254,10 @@ export default function IDE({
         saveTempFiles(copy);
         return copy;
       });
-      
+
       setOpenTabs((prev) => prev.map((t) => (t === oldPath ? newBase : t)));
       setActiveFile((prev) => (prev === oldPath ? newBase : prev));
-      
+
       if (project && setProject) {
         setProject((prev) => {
           if (!prev) return prev;
@@ -274,7 +279,7 @@ export default function IDE({
         [activeFile]: { ...prev[activeFile], code: val },
       }));
       setDirtyFiles((prev) => ({ ...prev, [activeFile]: false }));
-      
+
       if (project && setProject) {
         const updated = {
           ...(project || {}),
@@ -283,20 +288,20 @@ export default function IDE({
         setProject(updated);
       }
     } catch (e) {
-      console.error('Save failed', e);
-      toast.error('Save failed');
+      console.error("Save failed", e);
+      toast.error("Save failed");
     }
   };
 
   useEffect(() => {
     function onKey(e) {
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "s") {
         e.preventDefault();
         handleSaveCurrent();
       }
     }
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
   }, [activeFile, files]);
 
   useEffect(() => {
@@ -304,7 +309,7 @@ export default function IDE({
     const t = setInterval(() => {
       const dirty = Object.keys(dirtyFiles || {}).filter((k) => dirtyFiles[k]);
       if (dirty.length === 0) return;
-      
+
       if (project && setProject) {
         setProject((prev) => ({
           ...(prev || {}),
@@ -334,7 +339,7 @@ export default function IDE({
       {/* Explorer (narrower) */}
       <div
         className={`${
-          collapsed ? 'w-16' : 'w-72'
+          collapsed ? "w-16" : "w-72"
         } border-r border-gray-700 min-h-0 transition-all duration-150`}
       >
         <TreeFileExplorer
@@ -357,7 +362,7 @@ export default function IDE({
           {activeFile && (
             <CodeEditor
               ref={editorRef}
-              code={files[activeFile]?.code || ''}
+              code={files[activeFile]?.code || ""}
               onChange={handleCodeChange}
               onCursor={handleCursor}
               language={getLanguage(activeFile)}
@@ -368,7 +373,7 @@ export default function IDE({
         {/* Status bar */}
         <div className="ide-statusbar">
           <div>
-            {activeFile ? activeFile.split('/').pop() : 'No file'} •{' '}
+            {activeFile ? activeFile.split("/").pop() : "No file"} •{" "}
             {getLanguage(activeFile)}
           </div>
           <div>

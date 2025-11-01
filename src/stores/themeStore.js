@@ -1,18 +1,17 @@
-import { create } from 'zustand';
-import { getTheme, setTheme as saveTheme } from '@/utils/storage';
+import { create } from "zustand";
+import { getTheme, setTheme as saveTheme } from "@/utils/storage";
 
 const useThemeStore = create((set, get) => ({
-  theme: 'dark',
+  theme: "dark",
   mounted: false,
 
   initializeTheme: () => {
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       const savedTheme = getTheme();
-      // Use classList to only toggle the `light` class so we don't remove other classes
-      if (savedTheme === 'light') {
-        document.documentElement.classList.add('light');
+      if (savedTheme === "light") {
+        document.documentElement.classList.add("light");
       } else {
-        document.documentElement.classList.remove('light');
+        document.documentElement.classList.remove("light");
       }
       set({ theme: savedTheme, mounted: true });
     }
@@ -20,26 +19,26 @@ const useThemeStore = create((set, get) => ({
 
   toggleTheme: () => {
     const { theme } = get();
-    const newTheme = theme === 'dark' ? 'light' : 'dark';
-    
+    const newTheme = theme === "dark" ? "light" : "dark";
+
     set({ theme: newTheme });
     saveTheme(newTheme);
-    if (newTheme === 'light') {
-      document.documentElement.classList.add('light');
+    if (newTheme === "light") {
+      document.documentElement.classList.add("light");
     } else {
-      document.documentElement.classList.remove('light');
+      document.documentElement.classList.remove("light");
     }
   },
 
   setTheme: (newTheme) => {
     set({ theme: newTheme });
     saveTheme(newTheme);
-    if (newTheme === 'light') {
-      document.documentElement.classList.add('light');
+    if (newTheme === "light") {
+      document.documentElement.classList.add("light");
     } else {
-      document.documentElement.classList.remove('light');
+      document.documentElement.classList.remove("light");
     }
-  }
+  },
 }));
 
 export default useThemeStore;

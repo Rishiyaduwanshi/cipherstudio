@@ -1,8 +1,8 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import 'react-toastify/dist/ReactToastify.css';
-import { ToastContainer } from 'react-toastify';
-import Header from '@/components/Header';
+import "react-toastify/dist/ReactToastify.css";
+import { ToastContainer } from "react-toastify";
+import Header from "@/components/Header";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -15,8 +15,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "CipherStudio - Learn & Grow Together",
-  description: "The ultimate destination for Students and Content Creators who crave an exhilarating online learning experience.",
+  title: "codestudio - Learn & Grow Together",
+  description:
+    "The ultimate destination for Students and Content Creators who crave an exhilarating online learning experience.",
 };
 
 export default function RootLayout({ children }) {
@@ -40,12 +41,12 @@ export default function RootLayout({ children }) {
           pauseOnHover
           theme="dark"
           toastStyle={{
-            backgroundColor: '#1e293b',
-            color: '#ffffff',
-            border: '1px solid #334155'
+            backgroundColor: "#1e293b",
+            color: "#ffffff",
+            border: "1px solid #334155",
           }}
           progressStyle={{
-            backgroundColor: '#6366f1'
+            backgroundColor: "#6366f1",
           }}
         />
       </body>
